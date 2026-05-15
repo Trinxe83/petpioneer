@@ -184,6 +184,19 @@
         .nav-btn:hover::before{transform:translateX(0);}
         .nav-btn span{position:relative;z-index:1;}
 
+        /* LANG SELECTOR */
+        .lang-selector{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1.5px solid var(--accent);background:var(--bg);}
+        .lang-btn{
+            background:none;border:none;padding:2px;cursor:pointer;
+            width:26px;height:19px;border-radius:2px;overflow:hidden;
+            opacity:.4;transition:opacity .2s,transform .15s;
+            display:flex;align-items:center;justify-content:center;
+        }
+        .lang-btn img{width:26px;height:19px;object-fit:cover;border-radius:2px;display:block;}
+        .lang-btn:hover{opacity:.8;transform:scale(1.12);}
+        .lang-btn.active{opacity:1;transform:scale(1.08);box-shadow:0 0 0 1.5px var(--accent);}
+        @media(max-width:900px){.lang-selector{display:none;}}
+
         /* TYPEWRITER word cycling */
         .hero-word{
             display:inline-block;
@@ -452,11 +465,23 @@
             </div>
         </div>
         <div class="nav-right">
+            <div class="lang-selector">
+                <button class="lang-btn active" onclick="setLang('es')" title="Español">
+                    <img src="https://flagcdn.com/w40/es.png" alt="ES"></button>
+                <button class="lang-btn" onclick="setLang('en')" title="English">
+                    <img src="https://flagcdn.com/w40/gb.png" alt="GB"></button>
+                <button class="lang-btn" onclick="setLang('fr')" title="Français">
+                    <img src="https://flagcdn.com/w40/fr.png" alt="FR"></button>
+                <button class="lang-btn" onclick="setLang('it')" title="Italiano">
+                    <img src="https://flagcdn.com/w40/it.png" alt="IT"></button>
+                <button class="lang-btn" onclick="setLang('de')" title="Deutsch">
+                    <img src="https://flagcdn.com/w40/de.png" alt="DE"></button>
+            </div>
             <button class="theme-toggle" id="themeToggle">
                 <span class="toggle-icon" id="toggleIcon">🌙</span>
                 <span class="toggle-label">Modo oscuro</span>
             </button>
-            <button class="nav-btn" id="openModal"><span>Unirse a la Red</span></button>
+            <button class="nav-btn" id="openModal"><span data-i18n="nav_join">Unirse a la Red</span></button>
         </div>
     </nav>
 
@@ -464,17 +489,17 @@
         <div style="max-width:540px">
             <div class="hero-badge" id="heroBadge">
                 <div class="hero-badge-dot"></div>
-                <span class="label" style="color:var(--accent);font-size:.56rem">Sistema activo · Administración Local 2026</span>
+                <span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="hero_badge">Sistema activo · Administración Local 2026</span>
             </div>
             <h1 class="display display-xl" style="color:var(--text-primary)" id="heroTitle">
-                Tu ciudad,<br><span class="hero-word" id="heroWord">su hogar.</span>
+                <span data-i18n="hero_title">Tu ciudad,</span><br><span class="hero-word" id="heroWord">su hogar.</span>
             </h1>
-            <p style="max-width:400px;color:var(--text-secondary);line-height:1.8;font-size:.9rem;margin-top:1.4rem;font-weight:300" id="heroDesc">
+            <p style="max-width:400px;color:var(--text-secondary);line-height:1.8;font-size:.9rem;margin-top:1.4rem;font-weight:300" id="heroDesc" data-i18n="hero_desc">
                 La plataforma oficial para descubrir y certificar servicios PetFriendly en el municipio.
             </p>
             <div style="display:flex;gap:1rem;align-items:center;margin-top:2.4rem" id="heroCta">
-                <a href="#mapa-section" style="display:inline-flex;align-items:center;gap:10px;padding:13px 26px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'">Ver Mapa Interactivo <span>→</span></a>
-                <a href="#institucional" style="color:var(--text-secondary);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:13px 0;border-bottom:1px solid var(--border-strong);transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'">Por qué PetPioneer</a>
+                <a href="#mapa-section" style="display:inline-flex;align-items:center;gap:10px;padding:13px 26px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'" data-i18n="hero_cta1">Ver Mapa Interactivo →</a>
+                <a href="#institucional" style="color:var(--text-secondary);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:13px 0;border-bottom:1px solid var(--border-strong);transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'" data-i18n="hero_cta2">Por qué PetPioneer</a>
             </div>
         </div>
     </div>
@@ -514,19 +539,19 @@
 <div class="stats-band reveal" id="statsBand">
     <div class="stat-item">
         <div class="stat-num" id="statLocales">0</div>
-        <div class="label" style="color:var(--text-muted);font-size:.56rem">Locales Certificados</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem" id="sl-locals">Locales Certificados</div>
     </div>
     <div class="stat-item">
         <div class="stat-num" id="statBarrios">0</div>
-        <div class="label" style="color:var(--text-muted);font-size:.56rem">Barrios Adheridos</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem" id="sl-barrios">Barrios Adheridos</div>
     </div>
     <div class="stat-item">
         <div class="stat-num">4.8<span style="font-size:1rem;color:var(--text-muted)">/5</span></div>
-        <div class="label" style="color:var(--text-muted);font-size:.56rem">Valoración Media</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem" id="sl-rating">Valoración Media</div>
     </div>
     <div class="stat-item">
         <div class="stat-num" id="statSolicitudes">0</div>
-        <div class="label" style="color:var(--text-muted);font-size:.56rem">Solicitudes Este Mes</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem" id="sl-requests">Solicitudes Este Mes</div>
     </div>
 </div>
 
@@ -535,41 +560,41 @@
     <div style="max-width:1400px;margin:0 auto;">
         <div class="section-eyebrow reveal">
             <div class="eyebrow-line"></div>
-            <span class="label" style="color:var(--accent);font-size:.56rem">Por qué PetPioneer</span>
+            <span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="instit_eyebrow">Por qué PetPioneer</span>
         </div>
         <h2 class="display display-lg reveal" style="color:var(--text-primary);max-width:560px">
-            Una ciudad que cuida<br><em style="color:var(--accent)">a los suyos.</em>
+            <span data-i18n="instit_title">Una ciudad que cuida</span><br><em style="color:var(--accent)" data-i18n="instit_em">a los suyos.</em>
         </h2>
         <div class="instit-grid reveal">
             <div>
-                <p class="instit-intro">
+                <p class="instit-intro" data-i18n="instit_intro">
                     El 42% de los hogares españoles convive con una mascota. PetPioneer nace para que el Ayuntamiento lidere una política municipal que convierte esa realidad en una ventaja competitiva para el comercio local y en calidad de vida para los vecinos.
                 </p>
                 <div class="pilares">
                     <div class="pilar">
                         <span class="pilar-icon">🐾</span>
-                        <div class="pilar-title">Bienestar Animal</div>
-                        <div class="pilar-desc">Garantizamos que cada local certificado cumple estándares de acogida y bienestar para los animales de compañía.</div>
+                        <div class="pilar-title" id="p1t">Bienestar Animal</div>
+                        <div class="pilar-desc" id="p1d">Garantizamos que cada local certificado cumple estándares de acogida y bienestar para los animales de compañía.</div>
                     </div>
                     <div class="pilar">
                         <span class="pilar-icon">📈</span>
-                        <div class="pilar-title">Dinamización Económica</div>
-                        <div class="pilar-desc">Los establecimientos PetFriendly certificados aumentan su ticket medio un 23% al ampliar su clientela potencial.</div>
+                        <div class="pilar-title" id="p2t">Dinamización Económica</div>
+                        <div class="pilar-desc" id="p2d">Los establecimientos PetFriendly certificados aumentan su ticket medio un 23% al ampliar su clientela potencial.</div>
                     </div>
                     <div class="pilar">
                         <span class="pilar-icon">🧭</span>
-                        <div class="pilar-title">Turismo de Calidad</div>
-                        <div class="pilar-desc">El turismo con mascotas crece un 18% anual. Un directorio oficial posiciona la ciudad como destino PetFriendly a nivel nacional.</div>
+                        <div class="pilar-title" id="p3t">Turismo de Calidad</div>
+                        <div class="pilar-desc" id="p3d">El turismo con mascotas crece un 18% anual. Un directorio oficial posiciona la ciudad como destino PetFriendly a nivel nacional.</div>
                     </div>
                     <div class="pilar">
                         <span class="pilar-icon">🏛️</span>
-                        <div class="pilar-title">Imagen Institucional</div>
-                        <div class="pilar-desc">Una ciudad que certifica el bienestar animal transmite valores modernos, inclusivos y comprometidos con su comunidad.</div>
+                        <div class="pilar-title" id="p4t">Imagen Institucional</div>
+                        <div class="pilar-desc" id="p4d">Una ciudad que certifica el bienestar animal transmite valores modernos, inclusivos y comprometidos con su comunidad.</div>
                     </div>
                 </div>
                 <div class="instit-cta-row">
-                    <a href="#cert-section" style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'">Ver proceso de adhesión →</a>
-                    <button class="nav-btn" id="openModal3"><span>Solicitar información</span></button>
+                    <a href="#cert-section" id="instit-cta1-link" style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'" data-i18n="instit_cta1">Ver proceso de adhesión →</a>
+                    <button class="nav-btn" id="openModal3"><span data-i18n="instit_cta2">Solicitar información</span></button>
                 </div>
             </div>
             <div class="instit-visual">
@@ -578,7 +603,7 @@
                          onerror="this.src='https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&q=80&w=700'">
                     <div class="instit-img-overlay"></div>
                     <div class="instit-quote">
-                        <div class="instit-quote-text">"La certificación PetPioneer ha triplicado las visitas de familias con mascotas a nuestra terraza."</div>
+                        <div class="instit-quote-text" data-i18n="instit_quote">"La certificación PetPioneer ha triplicado las visitas de familias con mascotas a nuestra terraza."</div>
                         <div class="instit-quote-source">— María G., Bistró del Parque · Centro</div>
                     </div>
                 </div>
@@ -592,20 +617,20 @@
     <div class="map-header reveal">
         <div class="section-eyebrow">
             <div class="eyebrow-line"></div>
-            <span class="label" style="color:var(--accent);font-size:.56rem">Directorio Geolocalizado</span>
+            <span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="map_eyebrow">Directorio Geolocalizado</span>
         </div>
         <h2 class="display display-lg" style="color:var(--text-primary);max-width:460px">
-            Mapa <em style="color:var(--accent)">Vivo</em><br>
-            <span style="font-size:.42em;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text-muted)">Todos los locales certificados en tiempo real</span>
+            <span data-i18n="map_title">Mapa</span> <em style="color:var(--accent)" data-i18n="map_em">Vivo</em><br>
+            <span style="font-size:.42em;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text-muted)" data-i18n="map_sub">Todos los locales certificados en tiempo real</span>
         </h2>
     </div>
 
     <!-- Mobile filters -->
     <div class="mobile-filters" id="mobileFilters">
-        <button class="mobile-filter-chip active" onclick="mobileFilter('all',this)">🗂 Todos</button>
-        <button class="mobile-filter-chip" onclick="mobileFilter('Hostelería',this)">🍽️ Hostelería</button>
-        <button class="mobile-filter-chip" onclick="mobileFilter('Alojamiento',this)">🏨 Alojamiento</button>
-        <button class="mobile-filter-chip" onclick="mobileFilter('Comercios',this)">🛍️ Comercios</button>
+        <button class="mobile-filter-chip active" onclick="mobileFilter('all',this)" data-i18n="map_all">🗂 Todos</button>
+        <button class="mobile-filter-chip" onclick="mobileFilter('Hostelería',this)" data-i18n="map_host">🍽️ Hostelería</button>
+        <button class="mobile-filter-chip" onclick="mobileFilter('Alojamiento',this)" data-i18n="map_aloj">🏨 Alojamiento</button>
+        <button class="mobile-filter-chip" onclick="mobileFilter('Comercios',this)" data-i18n="map_com">🛍️ Comercios</button>
     </div>
 
     <div class="map-container reveal">
@@ -614,16 +639,16 @@
                 <input class="sidebar-input" type="text" placeholder="🔍  Buscar local..." id="searchInput" oninput="handleSearch()">
             </div>
             <div class="filter-group">
-                <div class="filter-group-label">Categoría</div>
+                <div class="filter-group-label" data-i18n="map_cat">Categoría</div>
                 <div class="filter-chips">
-                    <button class="filter-chip active" onclick="filterCat('all',this)"><span class="filter-chip-dot" style="background:var(--accent)"></span>Todos</button>
-                    <button class="filter-chip" onclick="filterCat('Hostelería',this)"><span class="filter-chip-dot" style="background:#e8621a"></span>🍽️ Hostelería</button>
-                    <button class="filter-chip" onclick="filterCat('Alojamiento',this)"><span class="filter-chip-dot" style="background:#2563eb"></span>🏨 Alojamiento</button>
-                    <button class="filter-chip" onclick="filterCat('Comercios',this)"><span class="filter-chip-dot" style="background:#7c3aed"></span>🛍️ Comercios</button>
+                    <button class="filter-chip active" onclick="filterCat('all',this)"><span class="filter-chip-dot" style="background:var(--accent)"></span><span data-i18n="map_all">Todos</span></button>
+                    <button class="filter-chip" onclick="filterCat('Hostelería',this)"><span class="filter-chip-dot" style="background:#e8621a"></span><span data-i18n="map_host">🍽️ Hostelería</span></button>
+                    <button class="filter-chip" onclick="filterCat('Alojamiento',this)"><span class="filter-chip-dot" style="background:#2563eb"></span><span data-i18n="map_aloj">🏨 Alojamiento</span></button>
+                    <button class="filter-chip" onclick="filterCat('Comercios',this)"><span class="filter-chip-dot" style="background:#7c3aed"></span><span data-i18n="map_com">🛍️ Comercios</span></button>
                 </div>
             </div>
             <div class="filter-group" style="border-bottom:none">
-                <div class="filter-group-label">Barrio</div>
+                <div class="filter-group-label" data-i18n="map_barrio">Barrio</div>
                 <select class="sidebar-input" id="barrioSelect" onchange="renderMarkers()" style="cursor:pointer">
                     <option value="all">Todos los barrios</option>
                     <option value="Centro">Centro</option>
@@ -645,30 +670,30 @@
 
 <!-- ══ NOTICIAS ══ -->
 <section id="noticias-section">
-    <div class="section-eyebrow reveal"><div class="eyebrow-line"></div><span class="label" style="color:var(--accent);font-size:.56rem">Comunicaciones Municipales</span></div>
-    <h2 class="display display-lg reveal" style="color:var(--text-primary)">Actualidad <em style="color:var(--accent)">Institucional</em></h2>
+    <div class="section-eyebrow reveal"><div class="eyebrow-line"></div><span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="news_eyebrow">Comunicaciones Municipales</span></div>
+    <h2 class="display display-lg reveal" style="color:var(--text-primary)"><span data-i18n="news_title">Actualidad</span> <em style="color:var(--accent)" data-i18n="news_em">Institucional</em></h2>
     <div class="noticias-grid reveal">
         <div class="noticia-card featured">
             <img src="https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&q=80&w=600" class="noticia-img" alt="">
-            <span class="noticia-tag">Destacado</span>
-            <div class="noticia-date">12 Mayo, 2026</div>
-            <h3 class="noticia-title">El Ayuntamiento lanza la convocatoria oficial de adhesión PetPioneer 2026</h3>
-            <p class="noticia-desc">El programa municipal de certificación PetFriendly abre su primera convocatoria con el objetivo de incorporar más de 200 establecimientos en los próximos seis meses, reforzando el compromiso de la ciudad con el bienestar animal.</p>
+            <span class="noticia-tag" id="n1-tag">Destacado</span>
+            <div class="noticia-date" id="n1-date">12 Mayo, 2026</div>
+            <h3 class="noticia-title" id="n1-title">El Ayuntamiento lanza la convocatoria oficial de adhesión PetPioneer 2026</h3>
+            <p class="noticia-desc" id="n1-desc">El programa municipal de certificación PetFriendly abre su primera convocatoria con el objetivo de incorporar más de 200 establecimientos en los próximos seis meses.</p>
         </div>
         <div class="noticia-card">
-            <div class="noticia-date">8 Mayo, 2026</div>
-            <h3 class="noticia-title">Nueva normativa de acceso para mascotas en espacios públicos</h3>
-            <p class="noticia-desc">El pleno aprueba la actualización del reglamento municipal para facilitar el acceso en zonas verdes y terrazas certificadas.</p>
+            <div class="noticia-date" id="n2-date">8 Mayo, 2026</div>
+            <h3 class="noticia-title" id="n2-title">Nueva normativa de acceso para mascotas en espacios públicos</h3>
+            <p class="noticia-desc" id="n2-desc">El pleno aprueba la actualización del reglamento municipal para facilitar el acceso en zonas verdes y terrazas certificadas.</p>
         </div>
         <div class="noticia-card">
-            <div class="noticia-date">3 Mayo, 2026</div>
-            <h3 class="noticia-title">Primeros 47 locales reciben el distintivo PetPioneer</h3>
-            <p class="noticia-desc">La primera fase concluye con éxito: 47 establecimientos ya lucen el sello oficial y aparecen en el directorio.</p>
+            <div class="noticia-date" id="n3-date">3 Mayo, 2026</div>
+            <h3 class="noticia-title" id="n3-title">Primeros 47 locales reciben el distintivo PetPioneer</h3>
+            <p class="noticia-desc" id="n3-desc">La primera fase concluye con éxito: 47 establecimientos ya lucen el sello oficial.</p>
         </div>
         <div class="noticia-card">
-            <div class="noticia-date">28 Abril, 2026</div>
-            <h3 class="noticia-title">Taller gratuito: Cómo atender mejor a clientes con mascotas</h3>
-            <p class="noticia-desc">El Ayuntamiento organiza una jornada formativa para propietarios interesados en la certificación PetFriendly.</p>
+            <div class="noticia-date" id="n4-date">28 Abril, 2026</div>
+            <h3 class="noticia-title" id="n4-title">Taller gratuito: Cómo atender mejor a clientes con mascotas</h3>
+            <p class="noticia-desc" id="n4-desc">El Ayuntamiento organiza una jornada formativa para propietarios interesados en la certificación.</p>
         </div>
     </div>
 </section>
@@ -678,15 +703,15 @@
     <div class="cert-bg"></div>
     <div class="cert-grid">
         <div>
-            <div class="section-eyebrow reveal"><div class="eyebrow-line"></div><span class="label" style="color:var(--accent);font-size:.56rem">Proceso de Adhesión</span></div>
-            <h2 class="display display-lg reveal" style="color:var(--text-primary);margin-bottom:2.25rem">Cómo <em style="color:var(--accent)">certificarse</em></h2>
+            <div class="section-eyebrow reveal"><div class="eyebrow-line"></div><span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="cert_eyebrow">Proceso de Adhesión</span></div>
+            <h2 class="display display-lg reveal" style="color:var(--text-primary);margin-bottom:2.25rem"><span data-i18n="cert_title">Cómo</span> <em style="color:var(--accent)" data-i18n="cert_em">certificarse</em></h2>
             <div class="cert-steps reveal">
-                <div class="cert-step"><div class="cert-step-num">01</div><div><div class="cert-step-title">Solicitud Oficial</div><div class="cert-step-desc">Rellena el formulario con los datos fiscales y los servicios PetFriendly que ofreces.</div></div></div>
-                <div class="cert-step"><div class="cert-step-num">02</div><div><div class="cert-step-title">Revisión Municipal</div><div class="cert-step-desc">Un técnico valida la información y realiza una visita de inspección sin coste.</div></div></div>
-                <div class="cert-step"><div class="cert-step-num">03</div><div><div class="cert-step-title">Obtención del Sello</div><div class="cert-step-desc">Recibes el distintivo físico y tu establecimiento aparece en el directorio oficial.</div></div></div>
-                <div class="cert-step"><div class="cert-step-num">04</div><div><div class="cert-step-title">Renovación Anual</div><div class="cert-step-desc">La certificación se renueva cada año para garantizar la calidad del directorio.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">01</div><div><div class="cert-step-title" id="cs1t">Solicitud Oficial</div><div class="cert-step-desc" id="cs1d">Rellena el formulario con los datos fiscales y los servicios PetFriendly que ofreces.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">02</div><div><div class="cert-step-title" id="cs2t">Revisión Municipal</div><div class="cert-step-desc" id="cs2d">Un técnico valida la información y realiza una visita de inspección sin coste.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">03</div><div><div class="cert-step-title" id="cs3t">Obtención del Sello</div><div class="cert-step-desc" id="cs3d">Recibes el distintivo físico y tu establecimiento aparece en el directorio oficial.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">04</div><div><div class="cert-step-title" id="cs4t">Renovación Anual</div><div class="cert-step-desc" id="cs4d">La certificación se renueva cada año para garantizar la calidad del directorio.</div></div></div>
             </div>
-            <button class="nav-btn reveal" style="margin-top:2.25rem" id="openModal2"><span>Solicitar Adhesión Ahora</span></button>
+            <button class="nav-btn reveal" style="margin-top:2.25rem" id="openModal2"><span data-i18n="cert_cta">Solicitar Adhesión Ahora</span></button>
         </div>
         <div class="cert-badge-wrap reveal">
             <div style="position:relative">
@@ -695,7 +720,7 @@
                     <div class="cert-corner tl"></div><div class="cert-corner tr"></div>
                     <div class="cert-corner bl"></div><div class="cert-corner br"></div>
                     <div class="cert-inner">
-                        <div class="label" style="color:var(--text-muted);margin-bottom:.4rem;font-size:.5rem">Certificado Oficial</div>
+                        <div class="label" style="color:var(--text-muted);margin-bottom:.4rem;font-size:.5rem" data-i18n="cert_badge">Certificado Oficial</div>
                         <div style="font-size:2rem;margin-bottom:.2rem">🐾</div>
                         <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--text-primary);letter-spacing:.1em">PetPioneer</div>
                         <div class="cert-year">2026</div>
@@ -709,9 +734,9 @@
 
 <!-- ══ FOOTER ══ -->
 <footer>
-    <div class="footer-copy">© 2026 Ayuntamiento · PetPioneer. Todos los derechos reservados.</div>
+    <div class="footer-copy" id="footer-copy">© 2026 Ayuntamiento · PetPioneer. Todos los derechos reservados.</div>
     <div class="footer-links">
-        <a href="#">Aviso Legal</a><a href="#">Privacidad</a><a href="#">Accesibilidad</a><a href="#">Contacto</a>
+        <a href="#" id="fl-legal">Aviso Legal</a><a href="#" id="fl-priv">Privacidad</a><a href="#" id="fl-acc">Accesibilidad</a><a href="#" id="fl-cont">Contacto</a>
     </div>
 </footer>
 
@@ -721,8 +746,8 @@
         <button class="modal-close" id="closeModal">✕</button>
         <div class="modal-header">
             <div class="section-eyebrow" style="margin-bottom:.55rem"><div class="eyebrow-line" style="flex:0 0 22px"></div><span class="label" style="color:var(--accent);font-size:.5rem">Solicitud Oficial</span></div>
-            <h3 class="display" style="font-size:1.7rem;font-weight:400;color:var(--text-primary)">Adhesión al Programa</h3>
-            <p style="font-size:.76rem;color:var(--text-secondary);margin-top:.35rem;font-weight:300">Registro oficial PetPioneer 2026. Tiempo estimado: 3 minutos.</p>
+            <h3 class="display" style="font-size:1.7rem;font-weight:400;color:var(--text-primary)" data-i18n="modal_title">Adhesión al Programa</h3>
+            <p style="font-size:.76rem;color:var(--text-secondary);margin-top:.35rem;font-weight:300" data-i18n="modal_sub">Registro oficial PetPioneer 2026. Tiempo estimado: 3 minutos.</p>
         </div>
         <div class="modal-body">
             <form id="regForm" novalidate>
@@ -743,6 +768,594 @@
 </div>
 
 <script>
+// ── I18N ───────────────────────────────────
+const i18n = {
+    es: {
+        hero_badge:    'Sistema activo · Administración Local 2026',
+        hero_title:    'Tu ciudad,',
+        hero_words:    ['su hogar.','su parque.','su aventura.','su paraíso.','su mundo.'],
+        hero_desc:     'La plataforma oficial para descubrir y certificar servicios PetFriendly en el municipio.',
+        hero_cta1:     'Ver Mapa Interactivo →',
+        hero_cta2:     'Por qué PetPioneer',
+        nav_join:      'Unirse a la Red',
+        nav_dark:      'Modo oscuro',
+        nav_light:     'Modo claro',
+        stat_locals:   'Locales Certificados',
+        stat_barrios:  'Barrios Adheridos',
+        stat_rating:   'Valoración Media',
+        stat_requests: 'Solicitudes Este Mes',
+        instit_eyebrow:'Por qué PetPioneer',
+        instit_title:  'Una ciudad que cuida',
+        instit_em:     'a los suyos.',
+        instit_intro:  'El 42% de los hogares españoles convive con una mascota. PetPioneer nace para que el Ayuntamiento lidere una política municipal que convierte esa realidad en una ventaja competitiva para el comercio local y en calidad de vida para los vecinos.',
+        pilar1_title:  'Bienestar Animal',
+        pilar1_desc:   'Garantizamos que cada local certificado cumple estándares de acogida y bienestar para los animales de compañía.',
+        pilar2_title:  'Dinamización Económica',
+        pilar2_desc:   'Los establecimientos PetFriendly certificados aumentan su ticket medio un 23% al ampliar su clientela potencial.',
+        pilar3_title:  'Turismo de Calidad',
+        pilar3_desc:   'El turismo con mascotas crece un 18% anual. Un directorio oficial posiciona la ciudad como destino PetFriendly a nivel nacional.',
+        pilar4_title:  'Imagen Institucional',
+        pilar4_desc:   'Una ciudad que certifica el bienestar animal transmite valores modernos, inclusivos y comprometidos con su comunidad.',
+        instit_cta1:   'Ver proceso de adhesión →',
+        instit_cta2:   'Solicitar información',
+        instit_quote:  '"La certificación PetPioneer ha triplicado las visitas de familias con mascotas a nuestra terraza."',
+        map_eyebrow:   'Directorio Geolocalizado',
+        map_title:     'Mapa',
+        map_em:        'Vivo',
+        map_sub:       'Todos los locales certificados en tiempo real',
+        map_search:    '🔍  Buscar local...',
+        map_cat:       'Categoría',
+        map_all:       'Todos',
+        map_host:      '🍽️ Hostelería',
+        map_aloj:      '🏨 Alojamiento',
+        map_com:       '🛍️ Comercios',
+        map_barrio:    'Barrio',
+        map_allbar:    'Todos los barrios',
+        news_eyebrow:  'Comunicaciones Municipales',
+        news_title:    'Actualidad',
+        news_em:       'Institucional',
+        news1_tag:     'Destacado',
+        news1_date:    '12 Mayo, 2026',
+        news1_title:   'El Ayuntamiento lanza la convocatoria oficial de adhesión PetPioneer 2026',
+        news1_desc:    'El programa municipal de certificación PetFriendly abre su primera convocatoria con el objetivo de incorporar más de 200 establecimientos en los próximos seis meses.',
+        news2_date:    '8 Mayo, 2026',
+        news2_title:   'Nueva normativa de acceso para mascotas en espacios públicos',
+        news2_desc:    'El pleno aprueba la actualización del reglamento municipal para facilitar el acceso en zonas verdes y terrazas certificadas.',
+        news3_date:    '3 Mayo, 2026',
+        news3_title:   'Primeros 47 locales reciben el distintivo PetPioneer',
+        news3_desc:    'La primera fase concluye con éxito: 47 establecimientos ya lucen el sello oficial.',
+        news4_date:    '28 Abril, 2026',
+        news4_title:   'Taller gratuito: Cómo atender mejor a clientes con mascotas',
+        news4_desc:    'El Ayuntamiento organiza una jornada formativa para propietarios interesados en la certificación.',
+        cert_eyebrow:  'Proceso de Adhesión',
+        cert_title:    'Cómo',
+        cert_em:       'certificarse',
+        cert_s1t:      'Solicitud Oficial',
+        cert_s1d:      'Rellena el formulario con los datos fiscales y los servicios PetFriendly que ofreces.',
+        cert_s2t:      'Revisión Municipal',
+        cert_s2d:      'Un técnico valida la información y realiza una visita de inspección sin coste.',
+        cert_s3t:      'Obtención del Sello',
+        cert_s3d:      'Recibes el distintivo físico y tu establecimiento aparece en el directorio oficial.',
+        cert_s4t:      'Renovación Anual',
+        cert_s4d:      'La certificación se renueva cada año para garantizar la calidad del directorio.',
+        cert_cta:      'Solicitar Adhesión Ahora',
+        cert_badge:    'Certificado Oficial',
+        modal_eyebrow: 'Solicitud Oficial',
+        modal_title:   'Adhesión al Programa',
+        modal_sub:     'Registro oficial PetPioneer 2026. Tiempo estimado: 3 minutos.',
+        f_nombre:      'Nombre Fiscal *',
+        f_nombre_ph:   'Restaurante El Canino S.L.',
+        f_cif:         'CIF / NIF *',
+        f_cat_label:   'Categoría *',
+        f_cat_ph:      'Seleccionar...',
+        f_contacto:    'Persona de Contacto *',
+        f_contacto_ph: 'Nombre completo',
+        f_tel:         'Teléfono *',
+        f_email:       'Correo Electrónico *',
+        f_servicios:   'Servicios PetFriendly',
+        f_servicios_ph:'Agua, zona sombreada, menú especial...',
+        f_submit:      'Enviar Solicitud Oficial',
+        f_sending:     'Enviando...',
+        f_sent:        '✓ Solicitud Recibida',
+        f_privacy:     'Al enviar aceptas la política de privacidad del Ayuntamiento. Respuesta en 48-72h hábiles.',
+        footer_copy:   '© 2026 Ayuntamiento · PetPioneer. Todos los derechos reservados.',
+        footer_legal:  'Aviso Legal',
+        footer_priv:   'Privacidad',
+        footer_acc:    'Accesibilidad',
+        footer_cont:   'Contacto',
+        cta_llegar:    'Cómo llegar →',
+    },
+    en: {
+        hero_badge:    'System active · Local Administration 2026',
+        hero_title:    'Your city,',
+        hero_words:    ['your home.','your park.','your adventure.','your paradise.','your world.'],
+        hero_desc:     'The official platform to discover and certify PetFriendly services in the municipality.',
+        hero_cta1:     'View Interactive Map →',
+        hero_cta2:     'Why PetPioneer',
+        nav_join:      'Join the Network',
+        nav_dark:      'Dark mode',
+        nav_light:     'Light mode',
+        stat_locals:   'Certified Venues',
+        stat_barrios:  'Districts Joined',
+        stat_rating:   'Average Rating',
+        stat_requests: 'Requests This Month',
+        instit_eyebrow:'Why PetPioneer',
+        instit_title:  'A city that cares',
+        instit_em:     'for its own.',
+        instit_intro:  '42% of Spanish households live with a pet. PetPioneer empowers the City Council to lead a municipal policy that turns this reality into a competitive advantage for local commerce and quality of life for residents.',
+        pilar1_title:  'Animal Welfare',
+        pilar1_desc:   'We ensure every certified venue meets welcome and welfare standards for companion animals.',
+        pilar2_title:  'Economic Boost',
+        pilar2_desc:   'PetFriendly certified venues increase their average ticket by 23% by expanding their potential clientele.',
+        pilar3_title:  'Quality Tourism',
+        pilar3_desc:   'Pet tourism grows 18% annually. An official directory positions the city as a national PetFriendly destination.',
+        pilar4_title:  'Institutional Image',
+        pilar4_desc:   'A city that certifies animal welfare conveys modern, inclusive values committed to its community.',
+        instit_cta1:   'See accreditation process →',
+        instit_cta2:   'Request information',
+        instit_quote:  '"PetPioneer certification has tripled visits from families with pets to our terrace."',
+        map_eyebrow:   'Geolocated Directory',
+        map_title:     'Live',
+        map_em:        'Map',
+        map_sub:       'All certified venues in real time',
+        map_search:    '🔍  Search venue...',
+        map_cat:       'Category',
+        map_all:       'All',
+        map_host:      '🍽️ Restaurants',
+        map_aloj:      '🏨 Accommodation',
+        map_com:       '🛍️ Shops',
+        map_barrio:    'District',
+        map_allbar:    'All districts',
+        news_eyebrow:  'Municipal Communications',
+        news_title:    'Institutional',
+        news_em:       'News',
+        news1_tag:     'Featured',
+        news1_date:    'May 12, 2026',
+        news1_title:   'City Council launches official PetPioneer 2026 accreditation call',
+        news1_desc:    'The municipal PetFriendly certification programme opens its first call aiming to incorporate over 200 establishments in the next six months.',
+        news2_date:    'May 8, 2026',
+        news2_title:   'New pet access regulations for public spaces',
+        news2_desc:    'The plenary approves the update to municipal regulations to facilitate access in green areas and certified terraces.',
+        news3_date:    'May 3, 2026',
+        news3_title:   'First 47 venues receive the PetPioneer badge',
+        news3_desc:    'The first phase concludes successfully: 47 establishments now display the official seal.',
+        news4_date:    'April 28, 2026',
+        news4_title:   'Free workshop: How to better serve customers with pets',
+        news4_desc:    'The City Council organises a training day for business owners interested in PetFriendly certification.',
+        cert_eyebrow:  'Accreditation Process',
+        cert_title:    'How to',
+        cert_em:       'get certified',
+        cert_s1t:      'Official Application',
+        cert_s1d:      'Fill in the form with your fiscal details and the PetFriendly services you offer.',
+        cert_s2t:      'Municipal Review',
+        cert_s2d:      'A technician validates the information and carries out a free inspection visit.',
+        cert_s3t:      'Obtaining the Seal',
+        cert_s3d:      'You receive the physical badge and your establishment appears in the official directory.',
+        cert_s4t:      'Annual Renewal',
+        cert_s4d:      'Certification is renewed each year to guarantee the quality of the directory.',
+        cert_cta:      'Apply for Accreditation Now',
+        cert_badge:    'Official Certificate',
+        modal_eyebrow: 'Official Application',
+        modal_title:   'Programme Accreditation',
+        modal_sub:     'Official PetPioneer 2026 registration. Estimated time: 3 minutes.',
+        f_nombre:      'Business Name *',
+        f_nombre_ph:   'El Canino Restaurant Ltd.',
+        f_cif:         'Tax ID *',
+        f_cat_label:   'Category *',
+        f_cat_ph:      'Select...',
+        f_contacto:    'Contact Person *',
+        f_contacto_ph: 'Full name',
+        f_tel:         'Phone *',
+        f_email:       'Email Address *',
+        f_servicios:   'PetFriendly Services',
+        f_servicios_ph:'Water, shaded area, special menu...',
+        f_submit:      'Submit Official Application',
+        f_sending:     'Sending...',
+        f_sent:        '✓ Application Received',
+        f_privacy:     'By submitting you accept the City Council privacy policy. Response within 48-72 working hours.',
+        footer_copy:   '© 2026 City Council · PetPioneer. All rights reserved.',
+        footer_legal:  'Legal Notice',
+        footer_priv:   'Privacy',
+        footer_acc:    'Accessibility',
+        footer_cont:   'Contact',
+        cta_llegar:    'Get directions →',
+    },
+    fr: {
+        hero_badge:    'Système actif · Administration Locale 2026',
+        hero_title:    'Votre ville,',
+        hero_words:    ['votre maison.','votre parc.','votre aventure.','votre paradis.','votre monde.'],
+        hero_desc:     'La plateforme officielle pour découvrir et certifier les services PetFriendly dans la municipalité.',
+        hero_cta1:     'Voir la Carte Interactive →',
+        hero_cta2:     'Pourquoi PetPioneer',
+        nav_join:      'Rejoindre le Réseau',
+        nav_dark:      'Mode sombre',
+        nav_light:     'Mode clair',
+        stat_locals:   'Établissements Certifiés',
+        stat_barrios:  'Quartiers Adhérents',
+        stat_rating:   'Note Moyenne',
+        stat_requests: 'Demandes ce Mois',
+        instit_eyebrow:'Pourquoi PetPioneer',
+        instit_title:  'Une ville qui prend soin',
+        instit_em:     'des siens.',
+        instit_intro:  '42% des foyers espagnols vivent avec un animal de compagnie. PetPioneer permet à la Mairie de mener une politique municipale qui transforme cette réalité en avantage concurrentiel pour le commerce local.',
+        pilar1_title:  'Bien-être Animal',
+        pilar1_desc:   'Nous garantissons que chaque établissement certifié respecte les normes d\'accueil pour les animaux de compagnie.',
+        pilar2_title:  'Dynamisation Économique',
+        pilar2_desc:   'Les établissements PetFriendly certifiés augmentent leur ticket moyen de 23% en élargissant leur clientèle potentielle.',
+        pilar3_title:  'Tourisme de Qualité',
+        pilar3_desc:   'Le tourisme avec animaux croît de 18% par an. Un répertoire officiel positionne la ville comme destination PetFriendly.',
+        pilar4_title:  'Image Institutionnelle',
+        pilar4_desc:   'Une ville qui certifie le bien-être animal transmet des valeurs modernes et inclusives engagées envers sa communauté.',
+        instit_cta1:   'Voir le processus d\'adhésion →',
+        instit_cta2:   'Demander des informations',
+        instit_quote:  '"La certification PetPioneer a triplé les visites de familles avec animaux sur notre terrasse."',
+        map_eyebrow:   'Répertoire Géolocalisé',
+        map_title:     'Carte',
+        map_em:        'Vivante',
+        map_sub:       'Tous les établissements certifiés en temps réel',
+        map_search:    '🔍  Rechercher...',
+        map_cat:       'Catégorie',
+        map_all:       'Tous',
+        map_host:      '🍽️ Restauration',
+        map_aloj:      '🏨 Hébergement',
+        map_com:       '🛍️ Commerces',
+        map_barrio:    'Quartier',
+        map_allbar:    'Tous les quartiers',
+        news_eyebrow:  'Communications Municipales',
+        news_title:    'Actualité',
+        news_em:       'Institutionnelle',
+        news1_tag:     'À la une',
+        news1_date:    '12 Mai 2026',
+        news1_title:   'La Mairie lance l\'appel officiel d\'adhésion PetPioneer 2026',
+        news1_desc:    'Le programme municipal de certification PetFriendly ouvre son premier appel avec l\'objectif d\'incorporer plus de 200 établissements.',
+        news2_date:    '8 Mai 2026',
+        news2_title:   'Nouvelle réglementation d\'accès pour les animaux dans les espaces publics',
+        news2_desc:    'Le conseil municipal approuve la mise à jour du règlement pour faciliter l\'accès dans les espaces verts et terrasses certifiées.',
+        news3_date:    '3 Mai 2026',
+        news3_title:   'Les 47 premiers établissements reçoivent le badge PetPioneer',
+        news3_desc:    'La première phase s\'achève avec succès : 47 établissements arborent désormais le sceau officiel.',
+        news4_date:    '28 Avril 2026',
+        news4_title:   'Atelier gratuit : Mieux accueillir les clients avec animaux',
+        news4_desc:    'La Mairie organise une journée de formation pour les propriétaires intéressés par la certification.',
+        cert_eyebrow:  'Processus d\'Adhésion',
+        cert_title:    'Comment',
+        cert_em:       'se certifier',
+        cert_s1t:      'Demande Officielle',
+        cert_s1d:      'Remplissez le formulaire avec vos données fiscales et les services PetFriendly proposés.',
+        cert_s2t:      'Révision Municipale',
+        cert_s2d:      'Un technicien valide les informations et effectue une visite d\'inspection gratuite.',
+        cert_s3t:      'Obtention du Label',
+        cert_s3d:      'Vous recevez le badge physique et votre établissement apparaît dans le répertoire officiel.',
+        cert_s4t:      'Renouvellement Annuel',
+        cert_s4d:      'La certification est renouvelée chaque année pour garantir la qualité du répertoire.',
+        cert_cta:      'Demander l\'Adhésion Maintenant',
+        cert_badge:    'Certificat Officiel',
+        modal_eyebrow: 'Demande Officielle',
+        modal_title:   'Adhésion au Programme',
+        modal_sub:     'Inscription officielle PetPioneer 2026. Durée estimée : 3 minutes.',
+        f_nombre:      'Raison Sociale *',
+        f_nombre_ph:   'Restaurant Le Canin S.A.R.L.',
+        f_cif:         'SIRET / TVA *',
+        f_cat_label:   'Catégorie *',
+        f_cat_ph:      'Sélectionner...',
+        f_contacto:    'Personne de Contact *',
+        f_contacto_ph: 'Nom complet',
+        f_tel:         'Téléphone *',
+        f_email:       'Adresse E-mail *',
+        f_servicios:   'Services PetFriendly',
+        f_servicios_ph:'Eau, zone ombragée, menu spécial...',
+        f_submit:      'Envoyer la Demande Officielle',
+        f_sending:     'Envoi en cours...',
+        f_sent:        '✓ Demande Reçue',
+        f_privacy:     'En soumettant, vous acceptez la politique de confidentialité de la Mairie. Réponse sous 48-72h ouvrables.',
+        footer_copy:   '© 2026 Mairie · PetPioneer. Tous droits réservés.',
+        footer_legal:  'Mentions Légales',
+        footer_priv:   'Confidentialité',
+        footer_acc:    'Accessibilité',
+        footer_cont:   'Contact',
+        cta_llegar:    'Itinéraire →',
+    },
+    it: {
+        hero_badge:    'Sistema attivo · Amministrazione Locale 2026',
+        hero_title:    'La tua città,',
+        hero_words:    ['la tua casa.','il tuo parco.','la tua avventura.','il tuo paradiso.','il tuo mondo.'],
+        hero_desc:     'La piattaforma ufficiale per scoprire e certificare i servizi PetFriendly nel comune.',
+        hero_cta1:     'Vedi la Mappa Interattiva →',
+        hero_cta2:     'Perché PetPioneer',
+        nav_join:      'Unisciti alla Rete',
+        nav_dark:      'Modalità scura',
+        nav_light:     'Modalità chiara',
+        stat_locals:   'Locali Certificati',
+        stat_barrios:  'Quartieri Aderenti',
+        stat_rating:   'Valutazione Media',
+        stat_requests: 'Richieste Questo Mese',
+        instit_eyebrow:'Perché PetPioneer',
+        instit_title:  'Una città che si prende cura',
+        instit_em:     'dei suoi.',
+        instit_intro:  'Il 42% delle famiglie spagnole vive con un animale domestico. PetPioneer nasce per guidare una politica municipale che trasforma questa realtà in un vantaggio competitivo per il commercio locale.',
+        pilar1_title:  'Benessere Animale',
+        pilar1_desc:   'Garantiamo che ogni locale certificato soddisfi gli standard di accoglienza per gli animali domestici.',
+        pilar2_title:  'Sviluppo Economico',
+        pilar2_desc:   'I locali PetFriendly certificati aumentano il loro scontrino medio del 23% ampliando la clientela potenziale.',
+        pilar3_title:  'Turismo di Qualità',
+        pilar3_desc:   'Il turismo con animali cresce del 18% annuo. Un directory ufficiale posiziona la città come destinazione PetFriendly.',
+        pilar4_title:  'Immagine Istituzionale',
+        pilar4_desc:   'Una città che certifica il benessere animale trasmette valori moderni e inclusivi impegnati verso la comunità.',
+        instit_cta1:   'Vedi il processo di adesione →',
+        instit_cta2:   'Richiedi informazioni',
+        instit_quote:  '"La certificazione PetPioneer ha triplicato le visite di famiglie con animali alla nostra terrazza."',
+        map_eyebrow:   'Directory Geolocalizzata',
+        map_title:     'Mappa',
+        map_em:        'Viva',
+        map_sub:       'Tutti i locali certificati in tempo reale',
+        map_search:    '🔍  Cerca locale...',
+        map_cat:       'Categoria',
+        map_all:       'Tutti',
+        map_host:      '🍽️ Ristorazione',
+        map_aloj:      '🏨 Alloggio',
+        map_com:       '🛍️ Negozi',
+        map_barrio:    'Quartiere',
+        map_allbar:    'Tutti i quartieri',
+        news_eyebrow:  'Comunicazioni Municipali',
+        news_title:    'Attualità',
+        news_em:       'Istituzionale',
+        news1_tag:     'In evidenza',
+        news1_date:    '12 Maggio 2026',
+        news1_title:   'Il Comune lancia il bando ufficiale di adesione PetPioneer 2026',
+        news1_desc:    'Il programma municipale di certificazione PetFriendly apre il suo primo bando con l\'obiettivo di incorporare oltre 200 esercizi nei prossimi sei mesi.',
+        news2_date:    '8 Maggio 2026',
+        news2_title:   'Nuova normativa di accesso per animali negli spazi pubblici',
+        news2_desc:    'Il consiglio comunale approva l\'aggiornamento del regolamento per facilitare l\'accesso in aree verdi e terrazze certificate.',
+        news3_date:    '3 Maggio 2026',
+        news3_title:   'I primi 47 locali ricevono il distintivo PetPioneer',
+        news3_desc:    'La prima fase si conclude con successo: 47 esercizi espongono già il sigillo ufficiale.',
+        news4_date:    '28 Aprile 2026',
+        news4_title:   'Workshop gratuito: Come accogliere meglio i clienti con animali',
+        news4_desc:    'Il Comune organizza una giornata formativa per i titolari interessati alla certificazione.',
+        cert_eyebrow:  'Processo di Adesione',
+        cert_title:    'Come',
+        cert_em:       'certificarsi',
+        cert_s1t:      'Domanda Ufficiale',
+        cert_s1d:      'Compila il modulo con i dati fiscali e i servizi PetFriendly che offri.',
+        cert_s2t:      'Revisione Municipale',
+        cert_s2d:      'Un tecnico valida le informazioni ed effettua una visita di ispezione gratuita.',
+        cert_s3t:      'Ottenimento del Sigillo',
+        cert_s3d:      'Ricevi il distintivo fisico e il tuo esercizio appare nella directory ufficiale.',
+        cert_s4t:      'Rinnovo Annuale',
+        cert_s4d:      'La certificazione viene rinnovata ogni anno per garantire la qualità della directory.',
+        cert_cta:      'Richiedi Adesione Ora',
+        cert_badge:    'Certificato Ufficiale',
+        modal_eyebrow: 'Domanda Ufficiale',
+        modal_title:   'Adesione al Programma',
+        modal_sub:     'Registrazione ufficiale PetPioneer 2026. Tempo stimato: 3 minuti.',
+        f_nombre:      'Ragione Sociale *',
+        f_nombre_ph:   'Ristorante Il Cagnolino S.r.l.',
+        f_cif:         'P.IVA / C.F. *',
+        f_cat_label:   'Categoria *',
+        f_cat_ph:      'Seleziona...',
+        f_contacto:    'Persona di Contatto *',
+        f_contacto_ph: 'Nome completo',
+        f_tel:         'Telefono *',
+        f_email:       'Indirizzo E-mail *',
+        f_servicios:   'Servizi PetFriendly',
+        f_servicios_ph:'Acqua, zona ombreggiata, menu speciale...',
+        f_submit:      'Invia Domanda Ufficiale',
+        f_sending:     'Invio in corso...',
+        f_sent:        '✓ Domanda Ricevuta',
+        f_privacy:     'Inviando accetti la politica sulla privacy del Comune. Risposta entro 48-72 ore lavorative.',
+        footer_copy:   '© 2026 Comune · PetPioneer. Tutti i diritti riservati.',
+        footer_legal:  'Note Legali',
+        footer_priv:   'Privacy',
+        footer_acc:    'Accessibilità',
+        footer_cont:   'Contatti',
+        cta_llegar:    'Come arrivare →',
+    },
+    de: {
+        hero_badge:    'System aktiv · Kommunalverwaltung 2026',
+        hero_title:    'Deine Stadt,',
+        hero_words:    ['dein Zuhause.','dein Park.','dein Abenteuer.','dein Paradies.','deine Welt.'],
+        hero_desc:     'Die offizielle Plattform zur Entdeckung und Zertifizierung von PetFriendly-Diensten in der Gemeinde.',
+        hero_cta1:     'Interaktive Karte ansehen →',
+        hero_cta2:     'Warum PetPioneer',
+        nav_join:      'Netzwerk beitreten',
+        nav_dark:      'Dunkelmodus',
+        nav_light:     'Hellmodus',
+        stat_locals:   'Zertifizierte Betriebe',
+        stat_barrios:  'Beigetretene Bezirke',
+        stat_rating:   'Durchschnittsbewertung',
+        stat_requests: 'Anfragen diesen Monat',
+        instit_eyebrow:'Warum PetPioneer',
+        instit_title:  'Eine Stadt, die sich kümmert',
+        instit_em:     'um ihre eigenen.',
+        instit_intro:  '42% der spanischen Haushalte leben mit einem Haustier. PetPioneer befähigt die Stadtverwaltung, eine kommunale Politik zu führen, die diese Realität in einen Wettbewerbsvorteil für den lokalen Handel verwandelt.',
+        pilar1_title:  'Tierwohl',
+        pilar1_desc:   'Wir stellen sicher, dass jeder zertifizierte Betrieb die Willkommens- und Wohlfahrtsstandards für Haustiere erfüllt.',
+        pilar2_title:  'Wirtschaftliche Belebung',
+        pilar2_desc:   'Zertifizierte PetFriendly-Betriebe steigern ihren durchschnittlichen Bon um 23% durch Erweiterung ihrer potenziellen Kundschaft.',
+        pilar3_title:  'Qualitätstourismus',
+        pilar3_desc:   'Reisen mit Haustieren wächst jährlich um 18%. Ein offizielles Verzeichnis positioniert die Stadt als PetFriendly-Reiseziel.',
+        pilar4_title:  'Institutionelles Image',
+        pilar4_desc:   'Eine Stadt, die das Tierwohl zertifiziert, vermittelt moderne, inklusive Werte, die ihrer Gemeinschaft verpflichtet sind.',
+        instit_cta1:   'Zertifizierungsprozess ansehen →',
+        instit_cta2:   'Informationen anfordern',
+        instit_quote:  '"Die PetPioneer-Zertifizierung hat die Besuche von Familien mit Haustieren auf unserer Terrasse verdreifacht."',
+        map_eyebrow:   'Geolokalisiertes Verzeichnis',
+        map_title:     'Live',
+        map_em:        'Karte',
+        map_sub:       'Alle zertifizierten Betriebe in Echtzeit',
+        map_search:    '🔍  Betrieb suchen...',
+        map_cat:       'Kategorie',
+        map_all:       'Alle',
+        map_host:      '🍽️ Gastronomie',
+        map_aloj:      '🏨 Unterkunft',
+        map_com:       '🛍️ Geschäfte',
+        map_barrio:    'Bezirk',
+        map_allbar:    'Alle Bezirke',
+        news_eyebrow:  'Kommunale Mitteilungen',
+        news_title:    'Institutionelle',
+        news_em:       'Nachrichten',
+        news1_tag:     'Highlight',
+        news1_date:    '12. Mai 2026',
+        news1_title:   'Stadtverwaltung startet offiziellen PetPioneer 2026 Beitrittsaufruf',
+        news1_desc:    'Das kommunale PetFriendly-Zertifizierungsprogramm eröffnet seinen ersten Aufruf mit dem Ziel, über 200 Betriebe in den nächsten sechs Monaten aufzunehmen.',
+        news2_date:    '8. Mai 2026',
+        news2_title:   'Neue Zugangsregelungen für Haustiere in öffentlichen Räumen',
+        news2_desc:    'Der Gemeinderat genehmigt die Aktualisierung der kommunalen Verordnung zur Erleichterung des Zugangs in Grünflächen und zertifizierten Terrassen.',
+        news3_date:    '3. Mai 2026',
+        news3_title:   'Erste 47 Betriebe erhalten das PetPioneer-Abzeichen',
+        news3_desc:    'Die erste Phase endet erfolgreich: 47 Betriebe tragen bereits das offizielle Siegel.',
+        news4_date:    '28. April 2026',
+        news4_title:   'Kostenloser Workshop: Kunden mit Haustieren besser bedienen',
+        news4_desc:    'Die Stadtverwaltung organisiert einen Schulungstag für Gewerbetreibende, die an der Zertifizierung interessiert sind.',
+        cert_eyebrow:  'Zertifizierungsprozess',
+        cert_title:    'Wie man sich',
+        cert_em:       'zertifizieren lässt',
+        cert_s1t:      'Offizieller Antrag',
+        cert_s1d:      'Füllen Sie das Formular mit Ihren Steuerdaten und den angebotenen PetFriendly-Diensten aus.',
+        cert_s2t:      'Kommunale Prüfung',
+        cert_s2d:      'Ein Techniker prüft die Informationen und führt einen kostenlosen Inspektionsbesuch durch.',
+        cert_s3t:      'Erhalt des Siegels',
+        cert_s3d:      'Sie erhalten das physische Abzeichen und Ihr Betrieb erscheint im offiziellen Verzeichnis.',
+        cert_s4t:      'Jährliche Erneuerung',
+        cert_s4d:      'Die Zertifizierung wird jährlich erneuert, um die Qualität des Verzeichnisses zu gewährleisten.',
+        cert_cta:      'Jetzt Beitritt beantragen',
+        cert_badge:    'Offizielles Zertifikat',
+        modal_eyebrow: 'Offizieller Antrag',
+        modal_title:   'Programmbeitritt',
+        modal_sub:     'Offizielle PetPioneer 2026 Registrierung. Geschätzte Zeit: 3 Minuten.',
+        f_nombre:      'Firmenname *',
+        f_nombre_ph:   'Restaurant El Canino GmbH',
+        f_cif:         'Steuernummer *',
+        f_cat_label:   'Kategorie *',
+        f_cat_ph:      'Auswählen...',
+        f_contacto:    'Ansprechpartner *',
+        f_contacto_ph: 'Vollständiger Name',
+        f_tel:         'Telefon *',
+        f_email:       'E-Mail-Adresse *',
+        f_servicios:   'PetFriendly-Dienste',
+        f_servicios_ph:'Wasser, Schattenbereich, Spezialmenü...',
+        f_submit:      'Offiziellen Antrag senden',
+        f_sending:     'Wird gesendet...',
+        f_sent:        '✓ Antrag Eingegangen',
+        f_privacy:     'Mit dem Absenden akzeptieren Sie die Datenschutzrichtlinie der Stadtverwaltung. Antwort innerhalb von 48-72 Werktagen.',
+        footer_copy:   '© 2026 Stadtverwaltung · PetPioneer. Alle Rechte vorbehalten.',
+        footer_legal:  'Impressum',
+        footer_priv:   'Datenschutz',
+        footer_acc:    'Barrierefreiheit',
+        footer_cont:   'Kontakt',
+        cta_llegar:    'Route planen →',
+    }
+};
+
+let currentLang = 'es';
+
+function setLang(lang) {
+    currentLang = lang;
+    const t = i18n[lang];
+    html.setAttribute('lang', lang);
+
+    // Actualizar botones de bandera
+    document.querySelectorAll('.lang-btn').forEach(b => {
+        const isActive = b.getAttribute('onclick').includes(`'${lang}'`);
+        b.classList.toggle('active', isActive);
+    });
+
+    // Actualizar todos los elementos con data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key] !== undefined) el.textContent = t[key];
+    });
+
+    // Textos especiales que no están en data-i18n
+    const toggleLbl = document.querySelector('.toggle-label');
+    if (toggleLbl) toggleLbl.textContent = isDark ? t.nav_light : t.nav_dark;
+
+    // Hero word cycling
+    words.length = 0;
+    t.hero_words.forEach(w => words.push(w));
+    if (wordEl) wordEl.textContent = words[0];
+
+    // Placeholder inputs
+    setPlaceholder('searchInput', t.map_search);
+    setPlaceholder('f-nombre', t.f_nombre_ph);
+    setPlaceholder('f-cif', t.f_cif);
+    setPlaceholder('f-contacto', t.f_contacto_ph);
+    setPlaceholder('f-tel', t.f_tel);
+    setPlaceholder('f-email', t.f_email);
+    setPlaceholder('f-servicios', t.f_servicios_ph);
+
+    // Labels del formulario
+    setLabel('f-nombre', t.f_nombre);
+    setLabel('f-cif', t.f_cif);
+    setLabel('f-cat', t.f_cat_label);
+    setLabel('f-contacto', t.f_contacto);
+    setLabel('f-tel', t.f_tel);
+    setLabel('f-email', t.f_email);
+    setLabel('f-servicios', t.f_servicios);
+
+    // Botón submit
+    const lbl = document.getElementById('submitLabel');
+    if (lbl) lbl.textContent = t.f_submit;
+
+    // Selector barrio first option
+    const bar = document.getElementById('barrioSelect');
+    if (bar) bar.options[0].text = t.map_allbar;
+
+    // Noticias
+    setTexts({
+        'n1-tag':t.news1_tag,'n1-date':t.news1_date,'n1-title':t.news1_title,'n1-desc':t.news1_desc,
+        'n2-date':t.news2_date,'n2-title':t.news2_title,'n2-desc':t.news2_desc,
+        'n3-date':t.news3_date,'n3-title':t.news3_title,'n3-desc':t.news3_desc,
+        'n4-date':t.news4_date,'n4-title':t.news4_title,'n4-desc':t.news4_desc,
+    });
+
+    // Pasos certificación
+    setTexts({
+        'cs1t':t.cert_s1t,'cs1d':t.cert_s1d,
+        'cs2t':t.cert_s2t,'cs2d':t.cert_s2d,
+        'cs3t':t.cert_s3t,'cs3d':t.cert_s3d,
+        'cs4t':t.cert_s4t,'cs4d':t.cert_s4d,
+    });
+
+    // Stats labels
+    setTexts({
+        'sl-locals':t.stat_locals,'sl-barrios':t.stat_barrios,
+        'sl-rating':t.stat_rating,'sl-requests':t.stat_requests,
+    });
+
+    // Pilares
+    setTexts({
+        'p1t':t.pilar1_title,'p1d':t.pilar1_desc,
+        'p2t':t.pilar2_title,'p2d':t.pilar2_desc,
+        'p3t':t.pilar3_title,'p3d':t.pilar3_desc,
+        'p4t':t.pilar4_title,'p4d':t.pilar4_desc,
+    });
+
+    // Footer links
+    setTexts({
+        'fl-legal':t.footer_legal,'fl-priv':t.footer_priv,
+        'fl-acc':t.footer_acc,'fl-cont':t.footer_cont,
+        'footer-copy':t.footer_copy,
+    });
+}
+
+function setPlaceholder(id, val) {
+    const el = document.getElementById(id);
+    if (el && val) el.placeholder = val;
+}
+function setLabel(fieldId, val) {
+    const el = document.getElementById(fieldId);
+    if (!el || !val) return;
+    const wrap = el.closest('.field-wrap');
+    if (wrap) { const lbl = wrap.querySelector('.field-label'); if (lbl) lbl.textContent = val; }
+}
+function setTexts(map) {
+    Object.entries(map).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el && val) el.textContent = val;
+    });
+}
+
 // ── THEME ──────────────────────────────────
 const html=document.documentElement;
 let isDark=false,mapTileLayer=null,targetColor={r:0,g:166,b:90};
