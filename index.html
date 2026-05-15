@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetPioneer | Directorio Municipal 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* ══ LIGHT ══ */
+        :root,[data-theme="light"]{
+            --accent:#059652;--accent-light:#07c468;--accent-dim:#34c47a;--accent-ultra:#e6f9f0;
+            --bg:#ffffff;--bg-mid:#f2fbf6;--bg-raised:#e6f5ee;--surface:#ffffff;--surface-raised:#f2fbf6;
+            --text-primary:#071a10;--text-secondary:#1a6b3c;--text-muted:#6dba96;
+            --border:rgba(5,150,82,0.15);--border-strong:rgba(5,150,82,0.35);
+            --stat-num-color:#059652;
+            --hero-filter:saturate(0.7) brightness(0.38);
+            --map-filter:saturate(0.35) brightness(1);
+            --img-filter:saturate(0.8);
+            --noise-opacity:0.1;
+            --particle-r:5;--particle-g:150;--particle-b:82;
+        }
+        /* ══ DARK ══ */
+        [data-theme="dark"]{
+            --accent:#c9a84c;--accent-light:#e8c96a;--accent-dim:#7a6330;--accent-ultra:rgba(201,168,76,0.06);
+            --bg:#0a0a0f;--bg-mid:#111118;--bg-raised:#1a1a26;--surface:#16161f;--surface-raised:#1e1e2e;
+            --text-primary:#f0ece4;--text-secondary:#8a8499;--text-muted:#4a4560;
+            --border:rgba(201,168,76,0.12);--border-strong:rgba(201,168,76,0.3);
+            --stat-num-color:#e8c96a;
+            --hero-filter:saturate(0.3) brightness(0.3);
+            --map-filter:saturate(0.15) brightness(0.7);
+            --img-filter:saturate(0.4);
+            --noise-opacity:0.4;
+            --particle-r:201;--particle-g:168;--particle-b:76;
+        }
+
+        body,header,nav,section,footer,div,span,p,h1,h2,h3,a,button,input,select,textarea{
+            transition:background-color .45s ease,border-color .45s ease,color .45s ease;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        html{scroll-behavior:smooth;}
+        body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text-primary);overflow-x:hidden;}
+
+        /* NOISE */
+        body::before{content:'';position:fixed;inset:0;z-index:1;pointer-events:none;
+            background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity:var(--noise-opacity);}
+
+        /* CURSOR */
+        .cursor{position:fixed;top:0;left:0;z-index:99999;pointer-events:none;}
+        .cursor-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;position:absolute;}
+        .cursor-ring{width:38px;height:38px;border:1.5px solid var(--accent);border-radius:50%;position:absolute;opacity:.45;transition:width .18s,height .18s,opacity .18s;}
+        body:has(a:hover) .cursor-ring,body:has(button:hover) .cursor-ring{width:54px;height:54px;opacity:.9;}
+
+        /* TYPE */
+        .display{font-family:'Cormorant Garamond',serif;}
+        .display-xl{font-size:clamp(3.5rem,8vw,7.5rem);line-height:.94;letter-spacing:-.02em;}
+        .display-lg{font-size:clamp(2.2rem,4.5vw,4rem);line-height:1;letter-spacing:-.02em;}
+        .label{font-size:.62rem;letter-spacing:.25em;text-transform:uppercase;font-weight:500;}
+
+        /* HERO */
+        .hero{position:relative;height:100svh;min-height:700px;display:flex;flex-direction:column;overflow:hidden;
+              background:var(--bg);} /* ← fix flash blanco */
+        .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:var(--hero-filter);}
+        .hero-overlay{position:absolute;inset:0;z-index:1;}
+        [data-theme="light"] .hero-overlay{
+            background:radial-gradient(ellipse 70% 60% at 50% 40%,rgba(255,255,255,.05) 0%,rgba(255,255,255,.75) 70%),
+                        linear-gradient(to bottom,rgba(255,255,255,.1) 0%,transparent 35%,rgba(255,255,255,.97) 100%);}
+        [data-theme="dark"] .hero-overlay{
+            background:radial-gradient(ellipse 80% 60% at 50% 40%,transparent 0%,#0a0a0f 80%),
+                        linear-gradient(to bottom,rgba(10,10,15,.15) 0%,transparent 30%,#0a0a0f 100%);}
+        .hero-lines{position:absolute;inset:0;z-index:2;pointer-events:none;}
+        [data-theme="light"] .hero-lines{background:linear-gradient(90deg,transparent 49.9%,rgba(13,122,78,.05) 50%,transparent 50.1%);}
+        [data-theme="dark"]  .hero-lines{background:linear-gradient(90deg,transparent 49.9%,rgba(201,168,76,.06) 50%,transparent 50.1%);}
+        .hero-content{position:relative;z-index:10;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding:0 6vw 8vh;}
+        .hero-badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-strong);padding:6px 14px;margin-bottom:1.75rem;background:var(--accent-ultra);}
+        .hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s ease infinite;flex-shrink:0;}
+        @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.65)}}
+        .hero-scroll{position:absolute;bottom:4vh;right:6vw;z-index:10;display:flex;flex-direction:column;align-items:center;gap:8px;}
+        .scroll-line{width:1px;height:55px;background:linear-gradient(to bottom,var(--accent),transparent);animation:scroll-anim 2.2s ease infinite;}
+        @keyframes scroll-anim{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+        /* NAV */
+        nav{position:relative;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:2rem 6vw;}
+        .nav-logo{display:flex;align-items:center;gap:10px;}
+        .logo-mark{width:34px;height:34px;border:1px solid var(--border-strong);display:flex;align-items:center;justify-content:center;position:relative;background:var(--accent-ultra);}
+        .logo-mark::before{content:'';position:absolute;inset:3px;border:1px solid var(--border);}
+        .nav-right{display:flex;align-items:center;gap:10px;}
+        .theme-toggle{display:flex;align-items:center;gap:7px;padding:8px 14px;border:1px solid var(--border-strong);background:var(--accent-ultra);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--text-secondary);}
+        .theme-toggle:hover{border-color:var(--accent);color:var(--accent);}
+        .toggle-icon{font-size:13px;display:inline-block;transition:transform .5s ease;}
+        [data-theme="dark"] .toggle-icon{transform:rotate(180deg);}
+        .nav-btn{font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;padding:10px 22px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;position:relative;overflow:hidden;}
+        .nav-btn::before{content:'';position:absolute;inset:0;background:var(--accent);transform:translateX(-101%);transition:transform .3s ease;}
+        .nav-btn:hover::before{transform:translateX(0);}
+        .nav-btn:hover{color:white;}
+        .nav-btn span{position:relative;z-index:1;}
+
+        /* STATS */
+        .stats-band{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg-mid);display:grid;grid-template-columns:repeat(4,1fr);}
+        .stat-item{padding:2rem 2.5rem;border-right:1px solid var(--border);display:flex;flex-direction:column;gap:5px;}
+        .stat-item:last-child{border-right:none;}
+        .stat-num{font-family:'Cormorant Garamond',serif;font-size:2.9rem;font-weight:300;color:var(--stat-num-color);line-height:1;}
+
+        /* SECTION EYEBROW */
+        .section-eyebrow{display:flex;align-items:center;gap:16px;margin-bottom:1rem;}
+        .eyebrow-line{flex:0 0 36px;height:1px;background:var(--accent);}
+
+        /* ══ SECCIÓN INSTITUCIONAL ══ */
+        #institucional{padding:8rem 6vw;background:var(--bg-mid);position:relative;overflow:hidden;}
+        #institucional::before{content:'';position:absolute;top:-120px;right:-80px;width:500px;height:500px;
+            border-radius:50%;background:radial-gradient(circle,var(--accent-ultra) 0%,transparent 70%);pointer-events:none;}
+        .instit-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;margin-top:3.5rem;}
+        .instit-intro{font-size:1.05rem;color:var(--text-secondary);line-height:1.85;font-weight:300;margin-bottom:2.5rem;}
+        .pilares{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);}
+        .pilar{padding:1.75rem;background:var(--bg);transition:background .25s;}
+        .pilar:hover{background:var(--bg-raised);}
+        .pilar-icon{font-size:1.8rem;margin-bottom:.75rem;display:block;}
+        .pilar-title{font-size:.88rem;font-weight:500;color:var(--text-primary);margin-bottom:.4rem;}
+        .pilar-desc{font-size:.76rem;color:var(--text-secondary);line-height:1.65;}
+        .instit-visual{position:relative;}
+        .instit-img-wrap{position:relative;overflow:hidden;}
+        .instit-img{width:100%;aspect-ratio:4/3;object-fit:cover;filter:var(--img-filter);display:block;}
+        .instit-img-overlay{position:absolute;inset:0;background:linear-gradient(to top,var(--bg-mid) 0%,transparent 50%);}
+        .instit-quote{position:absolute;bottom:0;left:0;right:0;padding:2rem;z-index:2;}
+        .instit-quote-text{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:300;font-style:italic;color:var(--text-primary);line-height:1.4;margin-bottom:.5rem;}
+        .instit-quote-source{font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--accent);}
+        .instit-cta-row{display:flex;gap:1rem;align-items:center;margin-top:2rem;}
+
+        /* MAP */
+        #mapa-section{padding:6rem 0 0;}
+        .map-header{padding:0 6vw 3rem;}
+        .map-container{position:relative;border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+        .map-sidebar{position:absolute;left:0;top:0;bottom:0;width:295px;z-index:20;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+        .sidebar-top{padding:1.1rem;border-bottom:1px solid var(--border);}
+        .sidebar-input{width:100%;background:var(--bg-mid);border:1px solid var(--border);padding:8px 12px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:.8rem;outline:none;}
+        .sidebar-input:focus{border-color:var(--accent);}
+        .sidebar-input::placeholder{color:var(--text-muted);}
+        .filter-group{padding:1.1rem;border-bottom:1px solid var(--border);}
+        .filter-group-label{font-size:.56rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.7rem;}
+        .filter-chips{display:flex;flex-direction:column;gap:3px;}
+        .filter-chip{display:flex;align-items:center;gap:9px;padding:7px 9px;border:1px solid transparent;background:transparent;color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:.77rem;cursor:pointer;text-align:left;width:100%;}
+        .filter-chip:hover{color:var(--text-primary);background:var(--bg-mid);border-color:var(--border);}
+        .filter-chip.active{color:var(--accent);border-color:var(--border-strong);background:var(--accent-ultra);}
+        .filter-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+        .locale-list{flex:1;overflow-y:auto;}
+        .locale-list::-webkit-scrollbar{width:2px;}
+        .locale-list::-webkit-scrollbar-thumb{background:var(--accent-dim);}
+        .locale-count{padding:.6rem 1.1rem;font-size:.62rem;color:var(--text-muted);border-bottom:1px solid var(--border);letter-spacing:.08em;}
+        .locale-card{padding:.9rem 1.1rem;border-bottom:1px solid var(--border);cursor:pointer;}
+        .locale-card:hover{background:var(--bg-mid);}
+        .locale-card.highlighted{background:var(--accent-ultra);border-left:2px solid var(--accent);}
+        .locale-card-name{font-size:.83rem;font-weight:500;color:var(--text-primary);}
+        .locale-card-meta{font-size:.68rem;color:var(--text-muted);display:flex;gap:5px;margin-top:2px;}
+        .locale-card-dot{width:5px;height:5px;border-radius:50%;align-self:center;}
+
+        /* Mobile map filters */
+        .mobile-filters{display:none;padding:1rem 6vw;gap:8px;overflow-x:auto;background:var(--bg-mid);border-bottom:1px solid var(--border);}
+        .mobile-filter-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border-strong);background:var(--bg);color:var(--text-secondary);font-family:'DM Sans',sans-serif;font-size:.72rem;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+        .mobile-filter-chip.active{background:var(--accent);color:white;border-color:var(--accent);}
+
+        #map{height:560px;margin-left:295px;z-index:10;filter:var(--map-filter);}
+
+        /* Leaflet */
+        .leaflet-popup-content-wrapper{background:var(--surface-raised);border-radius:0;padding:0;box-shadow:0 20px 50px rgba(0,0,0,.18);border:1px solid var(--border-strong);}
+        .leaflet-popup-content{margin:0;width:285px!important;}
+        .leaflet-popup-tip{background:var(--surface-raised);}
+        .leaflet-popup-close-button{color:var(--text-muted)!important;top:9px!important;right:11px!important;}
+        .leaflet-control-zoom{border:1px solid var(--border)!important;border-radius:0!important;box-shadow:none!important;}
+        .leaflet-control-zoom a{background:var(--surface)!important;color:var(--accent)!important;border-color:var(--border)!important;}
+        /* Popup open animation */
+        .leaflet-popup{animation:popupIn .22s cubic-bezier(.34,1.56,.64,1);}
+        @keyframes popupIn{from{opacity:0;transform:scale(.85) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+        /* POPUP */
+        .popup-img-wrap{position:relative;height:165px;overflow:hidden;background:var(--bg-mid);}
+        .popup-cat-badge{position:absolute;top:9px;left:9px;z-index:5;padding:3px 8px;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:white;}
+        .carousel-track{display:flex;transition:transform .38s cubic-bezier(.25,.46,.45,.94);height:100%;}
+        .carousel-track img{min-width:100%;height:100%;object-fit:cover;filter:var(--img-filter);}
+        .carr-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:24px;cursor:pointer;font-size:14px;z-index:10;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.88);border:1px solid rgba(0,0,0,.08);color:#222;}
+        [data-theme="dark"] .carr-btn{background:rgba(0,0,0,.55);border-color:rgba(255,255,255,.12);color:#eee;}
+        .carr-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+        .popup-body{padding:1rem;background:var(--surface-raised);}
+        .popup-name{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400;color:var(--text-primary);}
+        .popup-barrio{font-size:.66rem;color:var(--text-muted);margin:2px 0 .8rem;}
+        .popup-services{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:.9rem;}
+        .popup-tag{padding:2px 7px;background:var(--accent-ultra);border:1px solid var(--border-strong);font-size:.6rem;color:var(--accent);}
+        .popup-cta{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px;color:white;font-size:.66rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;}
+        .popup-cta:hover{opacity:.88;}
+
+        /* NOTICIAS */
+        #noticias-section{padding:7rem 6vw;background:var(--bg-mid);}
+        .noticias-grid{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:auto auto;gap:1px;background:var(--border);border:1px solid var(--border);margin-top:3rem;}
+        .noticia-card{background:var(--bg);padding:2.25rem;transition:background .25s;}
+        .noticia-card:hover{background:var(--bg-raised);}
+        .noticia-card.featured{grid-row:span 2;border-right:1px solid var(--border);}
+        .noticia-img{width:100%;aspect-ratio:16/9;object-fit:cover;margin-bottom:1.4rem;filter:var(--img-filter);transition:filter .4s;}
+        .noticia-card:hover .noticia-img{filter:saturate(.85);}
+        .noticia-date{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.55rem;}
+        .noticia-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:400;color:var(--text-primary);line-height:1.3;margin-bottom:.55rem;}
+        .noticia-card.featured .noticia-title{font-size:1.65rem;}
+        .noticia-desc{font-size:.76rem;color:var(--text-secondary);line-height:1.75;}
+        .noticia-tag{display:inline-block;padding:2px 9px;border:1px solid var(--accent);font-size:.57rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
+
+        /* CERT */
+        #cert-section{padding:8rem 6vw;position:relative;overflow:hidden;}
+        .cert-bg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 80% 50%,var(--accent-ultra) 0%,transparent 70%);pointer-events:none;}
+        .cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;}
+        .cert-badge-wrap{display:flex;justify-content:center;}
+        .cert-badge{width:265px;height:265px;border:1px solid var(--border-strong);position:relative;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+        .cert-badge::before{content:'';position:absolute;inset:10px;border:1px solid var(--border);}
+        .cert-badge::after{content:'';position:absolute;inset:20px;border:1px solid var(--border);}
+        .cert-corner{position:absolute;width:17px;height:17px;border-color:var(--accent);border-style:solid;}
+        .cert-corner.tl{top:-1px;left:-1px;border-width:2px 0 0 2px;}
+        .cert-corner.tr{top:-1px;right:-1px;border-width:2px 2px 0 0;}
+        .cert-corner.bl{bottom:-1px;left:-1px;border-width:0 0 2px 2px;}
+        .cert-corner.br{bottom:-1px;right:-1px;border-width:0 2px 2px 0;}
+        .cert-orbit{position:absolute;inset:-28px;border:1px dashed var(--border);animation:rotate-slow 30s linear infinite;}
+        .cert-orbit-dot{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:var(--accent);border-radius:50%;}
+        @keyframes rotate-slow{to{transform:rotate(360deg)}}
+        .cert-inner{text-align:center;z-index:1;}
+        .cert-year{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--accent);line-height:1;}
+        .cert-steps{display:flex;flex-direction:column;}
+        .cert-step{padding:1.6rem 0;border-bottom:1px solid var(--border);display:flex;gap:1.4rem;align-items:flex-start;}
+        .cert-step:last-child{border-bottom:none;}
+        .cert-step-num{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--accent-dim);line-height:1;flex-shrink:0;width:2.5rem;}
+        .cert-step-title{font-size:.86rem;font-weight:500;color:var(--text-primary);margin-bottom:3px;}
+        .cert-step-desc{font-size:.74rem;color:var(--text-secondary);line-height:1.65;}
+
+        /* MODAL */
+        .modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:2rem;}
+        .modal-overlay.open{display:flex;}
+        .modal-box{background:var(--bg);width:100%;max-width:610px;border:1px solid var(--border-strong);position:relative;max-height:90vh;overflow-y:auto;animation:modalIn .3s cubic-bezier(.34,1.2,.64,1);}
+        @keyframes modalIn{from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+        .modal-box::-webkit-scrollbar{width:2px;}
+        .modal-box::-webkit-scrollbar-thumb{background:var(--accent-dim);}
+        .modal-header{padding:2.1rem 2.4rem 1.6rem;border-bottom:1px solid var(--border);}
+        .modal-close{position:absolute;top:1.2rem;right:1.2rem;background:var(--bg-mid);border:1px solid var(--border);color:var(--text-muted);width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;}
+        .modal-close:hover{border-color:var(--accent);color:var(--accent);}
+        .modal-body{padding:1.8rem 2.4rem;}
+        .field-wrap{display:flex;flex-direction:column;gap:4px;}
+        .field-label{font-size:.57rem;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);}
+        .field-input,.field-select,.field-textarea{width:100%;background:var(--bg-mid);border:1px solid var(--border);padding:10px 12px;color:var(--text-primary);font-family:'DM Sans',sans-serif;font-size:.82rem;outline:none;border-radius:0;}
+        .field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--accent);}
+        .field-input::placeholder,.field-textarea::placeholder{color:var(--text-muted);}
+        .field-select{appearance:none;cursor:pointer;}
+        .field-input.error{border-color:#dc2626;}
+        .field-error{font-size:.64rem;color:#dc2626;display:none;}
+        .field-error.show{display:block;}
+        .field-textarea{resize:none;height:82px;}
+        .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .form-grid .full{grid-column:span 2;}
+        .submit-btn{width:100%;padding:14px;background:var(--accent);border:none;color:white;font-family:'DM Sans',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;margin-top:1.1rem;position:relative;overflow:hidden;}
+        .submit-btn::before{content:'';position:absolute;inset:0;background:var(--accent-light);transform:translateX(-101%);transition:transform .3s ease;}
+        .submit-btn:not(:disabled):hover::before{transform:translateX(0);}
+        .submit-btn span{position:relative;z-index:1;}
+        .submit-btn.success{background:#16a34a;}
+
+        /* FOOTER */
+        footer{border-top:1px solid var(--border);padding:2.25rem 6vw;background:var(--bg-mid);display:flex;justify-content:space-between;align-items:center;}
+        .footer-copy{font-size:.68rem;color:var(--text-muted);}
+        .footer-links{display:flex;gap:2rem;}
+        .footer-links a{font-size:.68rem;color:var(--text-muted);text-decoration:none;}
+        .footer-links a:hover{color:var(--accent);}
+
+        #particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+        .reveal{opacity:0;transform:translateY(26px);}
+
+        /* RESPONSIVE */
+        @media(max-width:900px){
+            .stats-band{grid-template-columns:repeat(2,1fr);}
+            .stat-item:nth-child(2){border-right:none;}
+            .map-sidebar{display:none;}
+            .mobile-filters{display:flex;}
+            #map{margin-left:0;height:420px;}
+            .noticias-grid{grid-template-columns:1fr;}
+            .noticia-card.featured{grid-row:span 1;border-right:none;}
+            .cert-grid{grid-template-columns:1fr;gap:3rem;}
+            .instit-grid{grid-template-columns:1fr;gap:3rem;}
+            .form-grid{grid-template-columns:1fr;}
+            .form-grid .full{grid-column:span 1;}
+            footer{flex-direction:column;gap:1.25rem;text-align:center;}
+            nav{padding:1.25rem 1.5rem;}
+            .hero-content{padding:0 1.5rem 8vh;}
+            .modal-header,.modal-body{padding-left:1.4rem;padding-right:1.4rem;}
+            .toggle-label{display:none;}
+            .pilares{grid-template-columns:1fr;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="cursor" id="cursor">
+    <div class="cursor-ring" id="cursorRing"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+</div>
+<canvas id="particles"></canvas>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+    <video class="hero-video" autoplay muted loop playsinline
+        poster="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=1920">
+        <source src="https://player.vimeo.com/external/394639912.sd.mp4?s=d0dbf11d13264b38378825f3cdb621e8e50b7132&profile_id=139&oauth2_token_id=57447761" type="video/mp4">
+    </video>
+    <div class="hero-overlay"></div>
+    <div class="hero-lines"></div>
+    <nav>
+        <div class="nav-logo">
+            <div class="logo-mark"><span style="font-size:15px">🐾</span></div>
+            <div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:1.12rem;font-weight:400;letter-spacing:.05em;color:var(--text-primary)">Pet<span style="color:var(--accent)">Pioneer</span></div>
+                <div class="label" style="color:var(--text-muted);font-size:.46rem;margin-top:1px">Directorio Municipal</div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button class="theme-toggle" id="themeToggle">
+                <span class="toggle-icon" id="toggleIcon">🌙</span>
+                <span class="toggle-label">Modo oscuro</span>
+            </button>
+            <button class="nav-btn" id="openModal"><span>Unirse a la Red</span></button>
+        </div>
+    </nav>
+    <div class="hero-content">
+        <div style="max-width:660px">
+            <div class="hero-badge" id="heroBadge">
+                <div class="hero-badge-dot"></div>
+                <span class="label" style="color:var(--accent);font-size:.56rem">Sistema activo · Administración Local 2026</span>
+            </div>
+            <h1 class="display display-xl" style="color:var(--text-primary)" id="heroTitle">
+                Tu ciudad,<br><em style="color:var(--accent);font-weight:300">su hogar.</em>
+            </h1>
+            <p style="max-width:420px;color:var(--text-secondary);line-height:1.8;font-size:.9rem;margin-top:1.4rem;font-weight:300" id="heroDesc">
+                La plataforma oficial para descubrir y certificar servicios PetFriendly en el municipio. Transparencia, calidad y confianza institucional.
+            </p>
+            <div style="display:flex;gap:1rem;align-items:center;margin-top:2.4rem" id="heroCta">
+                <a href="#mapa-section" style="display:inline-flex;align-items:center;gap:10px;padding:12px 24px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'">Ver Mapa Interactivo <span>→</span></a>
+                <a href="#institucional" style="color:var(--text-secondary);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:12px 0;border-bottom:1px solid var(--border-strong);transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'">Por qué PetPioneer</a>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll">
+        <div class="scroll-line"></div>
+        <span class="label" style="color:var(--text-muted);font-size:.5rem;writing-mode:vertical-rl">Scroll</span>
+    </div>
+</header>
+
+<!-- ══ STATS ══ -->
+<div class="stats-band reveal" id="statsBand">
+    <div class="stat-item">
+        <div class="stat-num" id="statLocales">0</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem">Locales Certificados</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num" id="statBarrios">0</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem">Barrios Adheridos</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num">4.8<span style="font-size:1rem;color:var(--text-muted)">/5</span></div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem">Valoración Media</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-num" id="statSolicitudes">0</div>
+        <div class="label" style="color:var(--text-muted);font-size:.56rem">Solicitudes Este Mes</div>
+    </div>
+</div>
+
+<!-- ══ INSTITUCIONAL ══ -->
+<section id="institucional">
+    <div style="max-width:1400px;margin:0 auto;">
+        <div class="section-eyebrow reveal">
+            <div class="eyebrow-line"></div>
+            <span class="label" style="color:var(--accent);font-size:.56rem">Por qué PetPioneer</span>
+        </div>
+        <h2 class="display display-lg reveal" style="color:var(--text-primary);max-width:560px">
+            Una ciudad que cuida<br><em style="color:var(--accent)">a los suyos.</em>
+        </h2>
+        <div class="instit-grid reveal">
+            <div>
+                <p class="instit-intro">
+                    El 42% de los hogares españoles convive con una mascota. PetPioneer nace para que el Ayuntamiento lidere una política municipal que convierte esa realidad en una ventaja competitiva para el comercio local y en calidad de vida para los vecinos.
+                </p>
+                <div class="pilares">
+                    <div class="pilar">
+                        <span class="pilar-icon">🐾</span>
+                        <div class="pilar-title">Bienestar Animal</div>
+                        <div class="pilar-desc">Garantizamos que cada local certificado cumple estándares de acogida y bienestar para los animales de compañía.</div>
+                    </div>
+                    <div class="pilar">
+                        <span class="pilar-icon">📈</span>
+                        <div class="pilar-title">Dinamización Económica</div>
+                        <div class="pilar-desc">Los establecimientos PetFriendly certificados aumentan su ticket medio un 23% al ampliar su clientela potencial.</div>
+                    </div>
+                    <div class="pilar">
+                        <span class="pilar-icon">🧭</span>
+                        <div class="pilar-title">Turismo de Calidad</div>
+                        <div class="pilar-desc">El turismo con mascotas crece un 18% anual. Un directorio oficial posiciona la ciudad como destino PetFriendly a nivel nacional.</div>
+                    </div>
+                    <div class="pilar">
+                        <span class="pilar-icon">🏛️</span>
+                        <div class="pilar-title">Imagen Institucional</div>
+                        <div class="pilar-desc">Una ciudad que certifica el bienestar animal transmite valores modernos, inclusivos y comprometidos con su comunidad.</div>
+                    </div>
+                </div>
+                <div class="instit-cta-row">
+                    <a href="#cert-section" style="display:inline-flex;align-items:center;gap:10px;padding:12px 22px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'">Ver proceso de adhesión →</a>
+                    <button class="nav-btn" id="openModal3"><span>Solicitar información</span></button>
+                </div>
+            </div>
+            <div class="instit-visual">
+                <div class="instit-img-wrap">
+                    <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=700" class="instit-img" alt="Ciudad PetFriendly"
+                         onerror="this.src='https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&q=80&w=700'">
+                    <div class="instit-img-overlay"></div>
+                    <div class="instit-quote">
+                        <div class="instit-quote-text">"La certificación PetPioneer ha triplicado las visitas de familias con mascotas a nuestra terraza."</div>
+                        <div class="instit-quote-source">— María G., Bistró del Parque · Centro</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ MAPA ══ -->
+<section id="mapa-section">
+    <div class="map-header reveal">
+        <div class="section-eyebrow">
+            <div class="eyebrow-line"></div>
+            <span class="label" style="color:var(--accent);font-size:.56rem">Directorio Geolocalizado</span>
+        </div>
+        <h2 class="display display-lg" style="color:var(--text-primary);max-width:460px">
+            Mapa <em style="color:var(--accent)">Vivo</em><br>
+            <span style="font-size:.42em;font-family:'DM Sans',sans-serif;font-weight:300;color:var(--text-muted)">Todos los locales certificados en tiempo real</span>
+        </h2>
+    </div>
+
+    <!-- Mobile filters -->
+    <div class="mobile-filters" id="mobileFilters">
+        <button class="mobile-filter-chip active" onclick="mobileFilter('all',this)">🗂 Todos</button>
+        <button class="mobile-filter-chip" onclick="mobileFilter('Hostelería',this)">🍽️ Hostelería</button>
+        <button class="mobile-filter-chip" onclick="mobileFilter('Alojamiento',this)">🏨 Alojamiento</button>
+        <button class="mobile-filter-chip" onclick="mobileFilter('Comercios',this)">🛍️ Comercios</button>
+    </div>
+
+    <div class="map-container reveal">
+        <div class="map-sidebar">
+            <div class="sidebar-top">
+                <input class="sidebar-input" type="text" placeholder="🔍  Buscar local..." id="searchInput" oninput="handleSearch()">
+            </div>
+            <div class="filter-group">
+                <div class="filter-group-label">Categoría</div>
+                <div class="filter-chips">
+                    <button class="filter-chip active" onclick="filterCat('all',this)"><span class="filter-chip-dot" style="background:var(--accent)"></span>Todos</button>
+                    <button class="filter-chip" onclick="filterCat('Hostelería',this)"><span class="filter-chip-dot" style="background:#e8621a"></span>🍽️ Hostelería</button>
+                    <button class="filter-chip" onclick="filterCat('Alojamiento',this)"><span class="filter-chip-dot" style="background:#2563eb"></span>🏨 Alojamiento</button>
+                    <button class="filter-chip" onclick="filterCat('Comercios',this)"><span class="filter-chip-dot" style="background:#7c3aed"></span>🛍️ Comercios</button>
+                </div>
+            </div>
+            <div class="filter-group" style="border-bottom:none">
+                <div class="filter-group-label">Barrio</div>
+                <select class="sidebar-input" id="barrioSelect" onchange="renderMarkers()" style="cursor:pointer">
+                    <option value="all">Todos los barrios</option>
+                    <option value="Centro">Centro</option>
+                    <option value="Retiro">Retiro</option>
+                    <option value="Salamanca">Salamanca</option>
+                    <option value="Malasaña">Malasaña</option>
+                    <option value="Chamberí">Chamberí</option>
+                    <option value="Lavapiés">Lavapiés</option>
+                </select>
+            </div>
+            <div class="locale-count" id="localeCount"></div>
+            <div class="locale-list" id="localeList"></div>
+        </div>
+        <div id="map"></div>
+    </div>
+</section>
+
+<!-- ══ NOTICIAS ══ -->
+<section id="noticias-section">
+    <div class="section-eyebrow reveal"><div class="eyebrow-line"></div><span class="label" style="color:var(--accent);font-size:.56rem">Comunicaciones Municipales</span></div>
+    <h2 class="display display-lg reveal" style="color:var(--text-primary)">Actualidad <em style="color:var(--accent)">Institucional</em></h2>
+    <div class="noticias-grid reveal">
+        <div class="noticia-card featured">
+            <img src="https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&q=80&w=600" class="noticia-img" alt="">
+            <span class="noticia-tag">Destacado</span>
+            <div class="noticia-date">12 Mayo, 2026</div>
+            <h3 class="noticia-title">El Ayuntamiento lanza la convocatoria oficial de adhesión PetPioneer 2026</h3>
+            <p class="noticia-desc">El programa municipal de certificación PetFriendly abre su primera convocatoria con el objetivo de incorporar más de 200 establecimientos en los próximos seis meses, reforzando el compromiso de la ciudad con el bienestar animal.</p>
+        </div>
+        <div class="noticia-card">
+            <div class="noticia-date">8 Mayo, 2026</div>
+            <h3 class="noticia-title">Nueva normativa de acceso para mascotas en espacios públicos</h3>
+            <p class="noticia-desc">El pleno aprueba la actualización del reglamento municipal para facilitar el acceso en zonas verdes y terrazas certificadas.</p>
+        </div>
+        <div class="noticia-card">
+            <div class="noticia-date">3 Mayo, 2026</div>
+            <h3 class="noticia-title">Primeros 47 locales reciben el distintivo PetPioneer</h3>
+            <p class="noticia-desc">La primera fase concluye con éxito: 47 establecimientos ya lucen el sello oficial y aparecen en el directorio.</p>
+        </div>
+        <div class="noticia-card">
+            <div class="noticia-date">28 Abril, 2026</div>
+            <h3 class="noticia-title">Taller gratuito: Cómo atender mejor a clientes con mascotas</h3>
+            <p class="noticia-desc">El Ayuntamiento organiza una jornada formativa para propietarios interesados en la certificación PetFriendly.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ══ CERT ══ -->
+<section id="cert-section">
+    <div class="cert-bg"></div>
+    <div class="cert-grid">
+        <div>
+            <div class="section-eyebrow reveal"><div class="eyebrow-line"></div><span class="label" style="color:var(--accent);font-size:.56rem">Proceso de Adhesión</span></div>
+            <h2 class="display display-lg reveal" style="color:var(--text-primary);margin-bottom:2.25rem">Cómo <em style="color:var(--accent)">certificarse</em></h2>
+            <div class="cert-steps reveal">
+                <div class="cert-step"><div class="cert-step-num">01</div><div><div class="cert-step-title">Solicitud Oficial</div><div class="cert-step-desc">Rellena el formulario con los datos fiscales y los servicios PetFriendly que ofreces.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">02</div><div><div class="cert-step-title">Revisión Municipal</div><div class="cert-step-desc">Un técnico valida la información y realiza una visita de inspección sin coste.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">03</div><div><div class="cert-step-title">Obtención del Sello</div><div class="cert-step-desc">Recibes el distintivo físico y tu establecimiento aparece en el directorio oficial.</div></div></div>
+                <div class="cert-step"><div class="cert-step-num">04</div><div><div class="cert-step-title">Renovación Anual</div><div class="cert-step-desc">La certificación se renueva cada año para garantizar la calidad del directorio.</div></div></div>
+            </div>
+            <button class="nav-btn reveal" style="margin-top:2.25rem" id="openModal2"><span>Solicitar Adhesión Ahora</span></button>
+        </div>
+        <div class="cert-badge-wrap reveal">
+            <div style="position:relative">
+                <div class="cert-orbit"><div class="cert-orbit-dot"></div></div>
+                <div class="cert-badge">
+                    <div class="cert-corner tl"></div><div class="cert-corner tr"></div>
+                    <div class="cert-corner bl"></div><div class="cert-corner br"></div>
+                    <div class="cert-inner">
+                        <div class="label" style="color:var(--text-muted);margin-bottom:.4rem;font-size:.5rem">Certificado Oficial</div>
+                        <div style="font-size:2rem;margin-bottom:.2rem">🐾</div>
+                        <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--text-primary);letter-spacing:.1em">PetPioneer</div>
+                        <div class="cert-year">2026</div>
+                        <div class="label" style="color:var(--text-muted);margin-top:.4rem;font-size:.46rem">Municipio · España</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+    <div class="footer-copy">© 2026 Ayuntamiento · PetPioneer. Todos los derechos reservados.</div>
+    <div class="footer-links">
+        <a href="#">Aviso Legal</a><a href="#">Privacidad</a><a href="#">Accesibilidad</a><a href="#">Contacto</a>
+    </div>
+</footer>
+
+<!-- ══ MODAL ══ -->
+<div class="modal-overlay" id="modalRegistro">
+    <div class="modal-box">
+        <button class="modal-close" id="closeModal">✕</button>
+        <div class="modal-header">
+            <div class="section-eyebrow" style="margin-bottom:.55rem"><div class="eyebrow-line" style="flex:0 0 22px"></div><span class="label" style="color:var(--accent);font-size:.5rem">Solicitud Oficial</span></div>
+            <h3 class="display" style="font-size:1.7rem;font-weight:400;color:var(--text-primary)">Adhesión al Programa</h3>
+            <p style="font-size:.76rem;color:var(--text-secondary);margin-top:.35rem;font-weight:300">Registro oficial PetPioneer 2026. Tiempo estimado: 3 minutos.</p>
+        </div>
+        <div class="modal-body">
+            <form id="regForm" novalidate>
+                <div class="form-grid">
+                    <div class="field-wrap full"><label class="field-label">Nombre Fiscal *</label><input class="field-input" type="text" id="f-nombre" placeholder="Restaurante El Canino S.L."><span class="field-error" id="e-nombre">Este campo es obligatorio</span></div>
+                    <div class="field-wrap"><label class="field-label">CIF / NIF *</label><input class="field-input" type="text" id="f-cif" placeholder="B12345678"><span class="field-error" id="e-cif">Mínimo 8 caracteres</span></div>
+                    <div class="field-wrap"><label class="field-label">Categoría *</label><select class="field-select" id="f-cat"><option value="">Seleccionar...</option><option>Hostelería</option><option>Alojamiento</option><option>Comercios</option></select><span class="field-error" id="e-cat">Selecciona una categoría</span></div>
+                    <div class="field-wrap"><label class="field-label">Persona de Contacto *</label><input class="field-input" type="text" id="f-contacto" placeholder="Nombre completo"><span class="field-error" id="e-contacto">Este campo es obligatorio</span></div>
+                    <div class="field-wrap"><label class="field-label">Teléfono *</label><input class="field-input" type="tel" id="f-tel" placeholder="+34 600 000 000"><span class="field-error" id="e-tel">Mínimo 9 dígitos</span></div>
+                    <div class="field-wrap full"><label class="field-label">Correo Electrónico *</label><input class="field-input" type="email" id="f-email" placeholder="contacto@establecimiento.com"><span class="field-error" id="e-email">Email no válido</span></div>
+                    <div class="field-wrap full"><label class="field-label">Servicios PetFriendly</label><textarea class="field-textarea" id="f-servicios" placeholder="Agua, zona sombreada, menú especial..."></textarea></div>
+                </div>
+                <button type="submit" class="submit-btn" id="submitBtn"><span id="submitLabel">Enviar Solicitud Oficial</span></button>
+                <p style="font-size:.62rem;color:var(--text-muted);text-align:center;margin-top:.8rem">Al enviar aceptas la política de privacidad del Ayuntamiento. Respuesta en 48-72h hábiles.</p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── THEME ──────────────────────────────────
+const html=document.documentElement;
+let isDark=false,mapTileLayer=null,targetColor={r:5,g:150,b:82};
+function applyTheme(dark){
+    isDark=dark;
+    html.setAttribute('data-theme',dark?'dark':'light');
+    document.getElementById('toggleIcon').textContent=dark?'☀️':'🌙';
+    const lbl=document.querySelector('.toggle-label');
+    if(lbl)lbl.textContent=dark?'Modo claro':'Modo oscuro';
+    targetColor=dark?{r:201,g:168,b:76}:{r:5,g:150,b:82};
+    if(mapTileLayer&&map){
+        map.removeLayer(mapTileLayer);
+        mapTileLayer=L.tileLayer(
+            dark?'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+               :'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+            {attribution:'&copy; CartoDB'}).addTo(map);
+    }
+}
+document.getElementById('themeToggle').addEventListener('click',()=>applyTheme(!isDark));
+
+// ── CURSOR ─────────────────────────────────
+const cDot=document.getElementById('cursorDot'),cRing=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+(function tick(){
+    cDot.style.transform=`translate(${mx-3.5}px,${my-3.5}px)`;
+    rx+=(mx-rx)*.11;ry+=(my-ry)*.11;
+    cRing.style.transform=`translate(${rx-19}px,${ry-19}px)`;
+    requestAnimationFrame(tick);
+})();
+if(window.matchMedia('(pointer:coarse)').matches)document.getElementById('cursor').style.display='none';
+
+// ── PARTICLES ──────────────────────────────
+const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');
+let W,H,curColor={r:5,g:150,b:82};
+function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;}
+resize();window.addEventListener('resize',resize);
+class P{
+    constructor(){this.reset();}
+    reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.s=Math.random()*1.1+.4;this.vx=(Math.random()-.5)*.18;this.vy=-Math.random()*.22-.07;this.o=Math.random()*.3+.05;this.l=1;}
+    update(){this.x+=this.vx;this.y+=this.vy;this.l-=.0018;if(this.y<-8||this.l<=0)this.reset();}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.s,0,Math.PI*2);ctx.fillStyle=`rgba(${~~curColor.r},${~~curColor.g},${~~curColor.b},${this.o*this.l})`;ctx.fill();}
+}
+const pts=Array.from({length:65},()=>new P());
+(function frame(){
+    ctx.clearRect(0,0,W,H);
+    curColor.r+=(targetColor.r-curColor.r)*.025;
+    curColor.g+=(targetColor.g-curColor.g)*.025;
+    curColor.b+=(targetColor.b-curColor.b)*.025;
+    pts.forEach(p=>{p.update();p.draw();});
+    requestAnimationFrame(frame);
+})();
+
+// ── GSAP ───────────────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+const tl=gsap.timeline({delay:.25});
+tl.from('#heroBadge',{y:18,opacity:0,duration:.8,ease:'power3.out'})
+  .from('#heroTitle',{y:55,opacity:0,duration:1.05,ease:'power3.out'},'-=.4')
+  .from('#heroDesc', {y:28,opacity:0,duration:.8,ease:'power3.out'},'-=.55')
+  .from('#heroCta',  {y:18,opacity:0,duration:.6,ease:'power3.out'},'-=.5');
+gsap.utils.toArray('.reveal').forEach(el=>{
+    gsap.to(el,{scrollTrigger:{trigger:el,start:'top 87%',toggleActions:'play none none none'},y:0,opacity:1,duration:.8,ease:'power3.out'});
+});
+function counter(id,target,suffix=''){
+    const el=document.getElementById(id);const s=performance.now();
+    (function u(now){const p=Math.min((now-s)/1500,1),e=1-Math.pow(1-p,3);el.textContent=~~(e*target)+suffix;if(p<1)requestAnimationFrame(u);})(performance.now());
+}
+ScrollTrigger.create({trigger:'#statsBand',start:'top 80%',once:true,
+    onEnter:()=>{counter('statLocales',247);counter('statBarrios',18);counter('statSolicitudes',34);}
+});
+
+// ── MAP DATA ───────────────────────────────
+const catMeta={
+    'Hostelería': {color:'#e8621a',bg:'#fff4ee',emoji:'🍽️'},
+    'Alojamiento':{color:'#2563eb',bg:'#eff4ff',emoji:'🏨'},
+    'Comercios':  {color:'#7c3aed',bg:'#f5f0ff',emoji:'🛍️'},
+};
+const locales=[
+    {id:1, name:"Bistró del Parque",      cat:"Hostelería", barrio:"Centro",    coords:[40.4160,-3.7030],emoji:'☕',tags:["Terraza Pet","Agua gratis","Menú especial"],  photos:["https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&q=80","https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&q=80"]},
+    {id:2, name:"Hotel Pioneer",           cat:"Alojamiento",barrio:"Retiro",    coords:[40.4210,-3.7150],emoji:'🏨',tags:["Camas pet","Servicio 24h","Sin recargo"],   photos:["https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80","https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?w=400&q=80"]},
+    {id:3, name:"Tienda Organic",          cat:"Comercios",  barrio:"Salamanca", coords:[40.4100,-3.6950],emoji:'🌿',tags:["Comida ecológica","Accesorios","Nutrición"],photos:["https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=400&q=80","https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80"]},
+    {id:4, name:"Café La Jauría",          cat:"Hostelería", barrio:"Centro",    coords:[40.4140,-3.7080],emoji:'🐾',tags:["Pet café","Zona interior","Eventos"],       photos:["https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80","https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80"]},
+    {id:5, name:"Apartamentos Retiro",     cat:"Alojamiento",barrio:"Retiro",    coords:[40.4180,-3.7120],emoji:'🌳',tags:["Apartamentos","Jardín privado","Parking"],  photos:["https://images.unsplash.com/photo-1560807707-8cc77767d783?w=400&q=80","https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80"]},
+    {id:6, name:"Veterinaria Centro",      cat:"Comercios",  barrio:"Centro",    coords:[40.4170,-3.7000],emoji:'💉',tags:["Urgencias 24h","Vacunación","Grooming"],    photos:["https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&q=80","https://images.unsplash.com/photo-1518155317743-a8ff43ea6a5f?w=400&q=80"]},
+    {id:7, name:"El Rincón de Lola",       cat:"Hostelería", barrio:"Malasaña",  coords:[40.4230,-3.7080],emoji:'🍷',tags:["Vinos y tapas","Terraza cubierta","Sin límite de tamaño"],photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"]},
+    {id:8, name:"Peluquería Canina ÖRE",   cat:"Comercios",  barrio:"Malasaña",  coords:[40.4250,-3.7060],emoji:'✂️',tags:["Peluquería","Baño aromático","Cita previa"],photos:["https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80","https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&q=80"]},
+    {id:9, name:"Hostal La Veleta",        cat:"Alojamiento",barrio:"Malasaña",  coords:[40.4240,-3.7040],emoji:'🛏️',tags:["Hostal boutique","Desayuno incluido","2 mascotas OK"],photos:["https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80"]},
+    {id:10,name:"Taberna El Hueso",        cat:"Hostelería", barrio:"Lavapiés",  coords:[40.4080,-3.7020],emoji:'🦴',tags:["Menú del día pet","Agua siempre","Terraza grande"],photos:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80","https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&q=80"]},
+    {id:11,name:"Centro Veterinario Sur",  cat:"Comercios",  barrio:"Lavapiés",  coords:[40.4060,-3.7010],emoji:'🩺',tags:["Consultas","Emergencias","Dietética"],       photos:["https://images.unsplash.com/photo-1559153466-bf0db82d5b94?w=400&q=80","https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80"]},
+    {id:12,name:"Aparthotel Parque",       cat:"Alojamiento",barrio:"Retiro",    coords:[40.4150,-3.7180],emoji:'🌿',tags:["Vistas al Retiro","Cocina equipada","Todas las razas"],photos:["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80","https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"]},
+    {id:13,name:"Café Mandarina",          cat:"Hostelería", barrio:"Chamberí",  coords:[40.4310,-3.7050],emoji:'🍊',tags:["Desayunos","Zona chill","Snacks para mascotas"],photos:["https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80","https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80"]},
+    {id:14,name:"Tienda Todo Mascota",     cat:"Comercios",  barrio:"Chamberí",  coords:[40.4330,-3.7030],emoji:'🐶',tags:["Alimentación","Accesorios premium","Asesoría"],photos:["https://images.unsplash.com/photo-1598875184994-c58b3c9b9694?w=400&q=80","https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=400&q=80"]},
+    {id:15,name:"Hotel Serrano Palace",    cat:"Alojamiento",barrio:"Salamanca", coords:[40.4200,-3.6880],emoji:'👑',tags:["5 estrellas","Spa pet","Menú gourmet"],       photos:["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80","https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&q=80"]},
+    {id:16,name:"El Jardín de Goya",       cat:"Hostelería", barrio:"Salamanca", coords:[40.4190,-3.6900],emoji:'🌸',tags:["Jardín privado","Carta vegana pet","Eventos"],photos:["https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&q=80","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80"]},
+    {id:17,name:"Farmacia Animal Goya",    cat:"Comercios",  barrio:"Salamanca", coords:[40.4170,-3.6870],emoji:'💊',tags:["Medicamentos","Nutrición clínica","Urgencias"], photos:["https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400&q=80","https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"]},
+    {id:18,name:"Bar La Guarida",          cat:"Hostelería", barrio:"Lavapiés",  coords:[40.4090,-3.7040],emoji:'🍺',tags:["Cerveza artesana","Pintxos","Sin restricción"],photos:["https://images.unsplash.com/photo-1555658636-6e4a36218be7?w=400&q=80","https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&q=80"]},
+];
+
+// ── MAP INIT ───────────────────────────────
+const map=L.map('map',{zoomControl:true,attributionControl:false}).setView([40.418,-3.703],14);
+mapTileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; CartoDB'}).addTo(map);
+
+let activeMarkers=[],activeCat='all',activeSearch='',highlightedId=null;
+
+function getFiltered(){
+    const barrio=document.getElementById('barrioSelect')?.value||'all';
+    return locales.filter(l=>
+        (activeCat==='all'||l.cat===activeCat)&&
+        (barrio==='all'||l.barrio===barrio)&&
+        (activeSearch===''||l.name.toLowerCase().includes(activeSearch.toLowerCase()))
+    );
+}
+
+function renderSidebar(filtered){
+    const count=document.getElementById('localeCount');
+    if(count)count.textContent=`${filtered.length} local${filtered.length!==1?'es':''} encontrado${filtered.length!==1?'s':''}`;
+    document.getElementById('localeList').innerHTML=filtered.length
+        ?filtered.map(l=>{const m=catMeta[l.cat];return`
+            <div class="locale-card ${l.id===highlightedId?'highlighted':''}" onclick="focusLocale(${l.id})">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:14px">${l.emoji||m.emoji}</span>
+                    <div class="locale-card-name">${l.name}</div>
+                </div>
+                <div class="locale-card-meta">
+                    <span class="locale-card-dot" style="background:${m.color}"></span>
+                    <span>${l.cat}</span><span>·</span><span>${l.barrio}</span>
+                </div>
+            </div>`;}).join('')
+        :`<div style="padding:2rem;text-align:center;font-size:.76rem;color:var(--text-muted)">Sin resultados</div>`;
+}
+
+function renderMarkers(){
+    activeMarkers.forEach(m=>map.removeLayer(m));
+    activeMarkers=[];
+    const filtered=getFiltered();
+    renderSidebar(filtered);
+    filtered.forEach(l=>{
+        const m=catMeta[l.cat];
+        const em=l.emoji||m.emoji;
+        const pinHtml=`<div style="position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 3px 7px rgba(0,0,0,0.25));transition:transform .15s ease" onmouseover="this.style.transform='scale(1.18)'" onmouseout="this.style.transform='scale(1)'"><div style="width:36px;height:36px;background:${m.color};border-radius:50% 50% 50% 4px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:2.5px solid white;"><span style="transform:rotate(45deg);font-size:16px;line-height:1">${em}</span></div></div>`;
+        const icon=L.divIcon({className:'',html:pinHtml,iconSize:[36,44],iconAnchor:[18,44],popupAnchor:[0,-46]});
+        const marker=L.marker(l.coords,{icon}).addTo(map);
+        const url=`https://www.google.com/maps/dir/?api=1&destination=${l.coords[0]},${l.coords[1]}`;
+        marker.bindPopup(`<div style="font-family:'DM Sans',sans-serif"><div class="popup-img-wrap"><div class="popup-cat-badge" style="background:${m.color}">${em} ${l.cat}</div><button class="carr-btn" style="left:8px" onclick="slide(${l.id},-1,${l.photos.length})">‹</button><button class="carr-btn" style="right:8px" onclick="slide(${l.id},1,${l.photos.length})">›</button><div class="carousel-track" id="track-${l.id}" data-idx="0">${l.photos.map(p=>`<img src="${p}" alt="${l.name}" loading="lazy">`).join('')}</div></div><div class="popup-body"><div class="popup-name">${l.name}</div><div class="popup-barrio">${l.barrio} · ${l.cat}</div><div class="popup-services">${l.tags.map(t=>`<span class="popup-tag">${t}</span>`).join('')}</div><a href="${url}" target="_blank" class="popup-cta" style="background:${m.color}">Cómo llegar →</a></div></div>`,{maxWidth:285});
+        marker.on('click',()=>{highlightedId=l.id;renderSidebar(getFiltered());});
+        activeMarkers.push(marker);
+    });
+}
+
+window.slide=function(id,step,total){
+    const t=document.getElementById('track-'+id);
+    const i=(parseInt(t.getAttribute('data-idx'))+step+total)%total;
+    t.setAttribute('data-idx',i);t.style.transform=`translateX(-${i*100}%)`;
+};
+
+window.focusLocale=function(id){
+    const l=locales.find(x=>x.id===id);if(!l)return;
+    highlightedId=id;map.setView(l.coords,16,{animate:true});renderSidebar(getFiltered());
+    const fi=getFiltered(),idx=fi.findIndex(x=>x.id===id);
+    if(idx>=0&&activeMarkers[idx])setTimeout(()=>activeMarkers[idx].openPopup(),500);
+};
+
+function filterCat(cat,btn){
+    document.querySelectorAll('.filter-chip').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');activeCat=cat;renderMarkers();
+}
+
+function mobileFilter(cat,btn){
+    document.querySelectorAll('.mobile-filter-chip').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');activeCat=cat;renderMarkers();
+}
+
+function handleSearch(){activeSearch=document.getElementById('searchInput').value;renderMarkers();}
+
+renderMarkers();
+
+// ── MODAL ──────────────────────────────────
+const modal=document.getElementById('modalRegistro');
+const openM=()=>modal.classList.add('open');
+const closeM=()=>modal.classList.remove('open');
+['openModal','openModal2','openModal3'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.addEventListener('click',openM);
+});
+document.getElementById('closeModal').addEventListener('click',closeM);
+modal.addEventListener('click',e=>{if(e.target===modal)closeM();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM();});
+
+// ── IMAGE FALLBACKS ────────────────────────
+// Si alguna imagen falla, mostramos un placeholder de color neutro
+document.querySelectorAll('img').forEach(img => {
+    img.addEventListener('error', function() {
+        this.style.background = 'var(--bg-raised)';
+        this.style.minHeight = this.classList.contains('instit-img') ? '300px' : '160px';
+        this.removeAttribute('src');
+    });
+});
+
+// ── FORM ───────────────────────────────────
+function se(id,msg){const e=document.getElementById('f-'+id),r=document.getElementById('e-'+id);if(e)e.classList.add('error');if(r&&msg)r.textContent=msg;if(r)r.classList.add('show');}
+function ce(id){const e=document.getElementById('f-'+id),r=document.getElementById('e-'+id);if(e)e.classList.remove('error');if(r)r.classList.remove('show');}
+['nombre','cif','cat','contacto','tel','email'].forEach(id=>{
+    const el=document.getElementById('f-'+id);if(el)el.addEventListener('input',()=>ce(id));
+});
+document.getElementById('regForm').addEventListener('submit',function(e){
+    e.preventDefault();let ok=true;
+    const v=id=>document.getElementById('f-'+id).value.trim();
+    if(!v('nombre')){se('nombre');ok=false;}
+    if(v('cif').length<8){se('cif');ok=false;}
+    if(!v('cat')){se('cat');ok=false;}
+    if(!v('contacto')){se('contacto');ok=false;}
+    if(v('tel').replace(/\D/g,'').length<9){se('tel');ok=false;}
+    if(!v('email').includes('@')){se('email');ok=false;}
+    if(!ok)return;
+    const btn=document.getElementById('submitBtn'),lbl=document.getElementById('submitLabel');
+    btn.disabled=true;lbl.textContent='Enviando...';
+    setTimeout(()=>{
+        btn.classList.add('success');lbl.textContent='✓ Solicitud Recibida';
+        setTimeout(()=>{closeM();btn.disabled=false;btn.classList.remove('success');lbl.textContent='Enviar Solicitud Oficial';this.reset();},2200);
+    },1600);
+});
+</script>
+</body>
+</html>
