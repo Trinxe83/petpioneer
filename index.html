@@ -412,9 +412,15 @@
         #particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
         .reveal{opacity:0;transform:translateY(26px);}
 
+        @keyframes dachshund-float {
+            0%,100%{ transform:translateY(0) rotate(-2deg); }
+            50%     { transform:translateY(-14px) rotate(2deg); }
+        }
+
         @media(max-width:900px){
             #mobileLangBar{display:flex !important;}
             .lang-selector{display:none;}
+            #dachshund{display:none !important;}
             /* Stats */
             .stats-band{grid-template-columns:repeat(2,1fr);}
             .stat-item:nth-child(2){border-right:none;}
@@ -519,8 +525,9 @@
         <div class="hero-left-bg"></div>
         <div class="hero-right-img">
             <img class="hero-parallax-img" id="heroParallax"
-                 src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&q=85&w=900"
-                 alt="Perro feliz en ciudad PetFriendly">
+                 src="https://images.unsplash.com/photo-1530126483408-aa533e55bdb2?auto=format&fit=crop&q=85&w=900"
+                 alt="Gos a la platja"
+                 onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&q=85&w=900'">
         </div>
     </div>
     <div class="hero-divider"></div>
@@ -662,7 +669,7 @@
         <div class="instit-grid reveal">
             <div>
                 <p class="instit-intro" data-i18n="instit_intro">
-                    El 42% de los hogares españoles convive con una mascota. PetPioneer nace para que el Ayuntamiento lidere una política municipal que convierte esa realidad en una ventaja competitiva para el comercio local y en calidad de vida para los vecinos.
+                    El 42% de les llars de Castelldefels conviu amb una mascota. PetPioneer neix perquè l'Ajuntament lideri una política municipal que converteixi aquesta realitat en un avantatge competitiu per al comerç local i en qualitat de vida per als veïns de Castelldefels.
                 </p>
                 <div class="pilares">
                     <div class="pilar">
@@ -698,7 +705,7 @@
                     <div class="instit-img-overlay"></div>
                     <div class="instit-quote">
                         <div class="instit-quote-text" data-i18n="instit_quote">"La certificación PetPioneer ha triplicado las visitas de familias con mascotas a nuestra terraza."</div>
-                        <div class="instit-quote-source">— María G., Bistró del Parque · Centro</div>
+                        <div class="instit-quote-source">— Maria G., Restaurant La Barca · Platja de Castelldefels</div>
                     </div>
                 </div>
             </div>
