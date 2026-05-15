@@ -413,6 +413,8 @@
         .reveal{opacity:0;transform:translateY(26px);}
 
         @media(max-width:900px){
+            #mobileLangBar{display:flex !important;}
+            .lang-selector{display:none;}
             /* Stats */
             .stats-band{grid-template-columns:repeat(2,1fr);}
             .stat-item:nth-child(2){border-right:none;}
@@ -536,14 +538,17 @@
             <div class="lang-selector">
                 <button class="lang-btn active" onclick="setLang('es')" title="Español">
                     <img src="https://flagcdn.com/w40/es.png" alt="ES"></button>
+                <button class="lang-btn" onclick="setLang('ca')" title="Català" style="background:none;border:none;padding:2px;cursor:pointer;width:26px;height:19px;border-radius:2px;overflow:hidden;opacity:.4;transition:opacity .2s,transform .15s;display:flex;align-items:center;justify-content:center;">
+                    <svg viewBox="0 0 26 19" xmlns="http://www.w3.org/2000/svg" style="width:26px;height:19px;border-radius:2px">
+                        <rect width="26" height="19" fill="#FCDD09"/>
+                        <rect y="2.375" width="26" height="2.375" fill="#DA121A"/>
+                        <rect y="7.125" width="26" height="2.375" fill="#DA121A"/>
+                        <rect y="11.875" width="26" height="2.375" fill="#DA121A"/>
+                        <rect y="16.625" width="26" height="2.375" fill="#DA121A"/>
+                    </svg>
+                </button>
                 <button class="lang-btn" onclick="setLang('en')" title="English">
                     <img src="https://flagcdn.com/w40/gb.png" alt="GB"></button>
-                <button class="lang-btn" onclick="setLang('fr')" title="Français">
-                    <img src="https://flagcdn.com/w40/fr.png" alt="FR"></button>
-                <button class="lang-btn" onclick="setLang('it')" title="Italiano">
-                    <img src="https://flagcdn.com/w40/it.png" alt="IT"></button>
-                <button class="lang-btn" onclick="setLang('de')" title="Deutsch">
-                    <img src="https://flagcdn.com/w40/de.png" alt="DE"></button>
             </div>
             <button class="theme-toggle" id="themeToggle">
                 <span class="toggle-icon" id="toggleIcon">🌙</span>
@@ -555,6 +560,27 @@
 
     <div class="hero-content">
         <div style="max-width:540px">
+            <!-- Banderas móvil — solo visibles en pantallas pequeñas -->
+            <div id="mobileLangBar" style="display:none;gap:10px;margin-bottom:1.2rem;align-items:center">
+                <button onclick="setLang('es');updateMobileLang('es')" id="mlang-es"
+                    style="width:38px;height:27px;border-radius:3px;overflow:hidden;border:2.5px solid white;padding:0;cursor:pointer;opacity:1;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
+                    <img src="https://flagcdn.com/w40/es.png" style="width:100%;height:100%;object-fit:cover;display:block" alt="ES">
+                </button>
+                <button onclick="setLang('ca');updateMobileLang('ca')" id="mlang-ca"
+                    style="width:38px;height:27px;border-radius:3px;overflow:hidden;border:2.5px solid transparent;padding:0;cursor:pointer;opacity:0.55;box-shadow:0 2px 8px rgba(0,0,0,0.3);background:none">
+                    <svg viewBox="0 0 38 27" xmlns="http://www.w3.org/2000/svg" style="width:38px;height:27px;display:block">
+                        <rect width="38" height="27" fill="#FCDD09"/>
+                        <rect y="3.375" width="38" height="3.375" fill="#DA121A"/>
+                        <rect y="10.125" width="38" height="3.375" fill="#DA121A"/>
+                        <rect y="16.875" width="38" height="3.375" fill="#DA121A"/>
+                        <rect y="23.625" width="38" height="3.375" fill="#DA121A"/>
+                    </svg>
+                </button>
+                <button onclick="setLang('en');updateMobileLang('en')" id="mlang-en"
+                    style="width:38px;height:27px;border-radius:3px;overflow:hidden;border:2.5px solid transparent;padding:0;cursor:pointer;opacity:0.55;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
+                    <img src="https://flagcdn.com/w40/gb.png" style="width:100%;height:100%;object-fit:cover;display:block" alt="EN">
+                </button>
+            </div>
             <div class="hero-badge" id="heroBadge">
                 <div class="hero-badge-dot"></div>
                 <span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="hero_badge">Sistema activo · Administración Local 2026</span>
@@ -718,13 +744,11 @@
             <div class="filter-group" style="border-bottom:none">
                 <div class="filter-group-label" data-i18n="map_barrio">Barrio</div>
                 <select class="sidebar-input" id="barrioSelect" onchange="renderMarkers()" style="cursor:pointer">
-                    <option value="all">Todos los barrios</option>
-                    <option value="Centro">Centro</option>
-                    <option value="Retiro">Retiro</option>
-                    <option value="Salamanca">Salamanca</option>
-                    <option value="Malasaña">Malasaña</option>
-                    <option value="Chamberí">Chamberí</option>
-                    <option value="Lavapiés">Lavapiés</option>
+                    <option value="all">Tots els barris</option>
+                    <option value="Platja">Platja</option>
+                    <option value="Centre">Centre</option>
+                    <option value="Castelldefels">Castelldefels</option>
+                    <option value="Gavà Mar">Gavà Mar</option>
                 </select>
             </div>
             <div class="locale-count" id="localeCount"></div>
@@ -792,7 +816,7 @@
                         <div style="font-size:2rem;margin-bottom:.2rem">🐾</div>
                         <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:300;color:var(--text-primary);letter-spacing:.1em">PetPioneer</div>
                         <div class="cert-year">2026</div>
-                        <div class="label" style="color:var(--text-muted);margin-top:.4rem;font-size:.46rem">Municipio · España</div>
+                        <div class="label" style="color:var(--text-muted);margin-top:.4rem;font-size:.46rem">Castelldefels · Catalunya</div>
                     </div>
                 </div>
             </div>
@@ -802,7 +826,7 @@
 
 <!-- ══ FOOTER ══ -->
 <footer>
-    <div class="footer-copy" id="footer-copy">© 2026 Ayuntamiento · PetPioneer. Todos los derechos reservados.</div>
+    <div class="footer-copy" id="footer-copy">© 2026 Ajuntament de Castelldefels · PetPioneer. Tots els drets reservats.</div>
     <div class="footer-links">
         <a href="#" id="fl-legal">Aviso Legal</a><a href="#" id="fl-priv">Privacidad</a><a href="#" id="fl-acc">Accesibilidad</a><a href="#" id="fl-cont">Contacto</a>
     </div>
@@ -932,6 +956,101 @@ const i18n = {
         footer_acc:    'Accesibilidad',
         footer_cont:   'Contacto',
         cta_llegar:    'Cómo llegar →',
+    },
+    ca: {
+        hero_badge:    'Sistema actiu · Administració Local 2026',
+        hero_title:    'La teva ciutat,',
+        hero_words:    ['la teva llar.','el teu parc.','la teva aventura.','el teu paradís.','el teu món.'],
+        hero_desc:     'La plataforma oficial per descobrir i certificar serveis PetFriendly al municipi.',
+        hero_cta1:     'Veure Mapa Interactiu →',
+        hero_cta2:     'Per què PetPioneer',
+        nav_join:      'Unir-se a la Xarxa',
+        nav_dark:      'Mode fosc',
+        nav_light:     'Mode clar',
+        stat_locals:   'Locals Certificats',
+        stat_barrios:  'Barris Adherits',
+        stat_rating:   'Valoració Mitjana',
+        stat_requests: 'Sol·licituds Aquest Mes',
+        instit_eyebrow:'Per què PetPioneer',
+        instit_title:  'Una ciutat que cuida',
+        instit_em:     'els seus.',
+        instit_intro:  'El 42% de les llars espanyoles conviu amb una mascota. PetPioneer neix perquè l\'Ajuntament lideri una política municipal que converteixi aquesta realitat en un avantatge competitiu per al comerç local i en qualitat de vida per als veïns.',
+        pilar1_title:  'Benestar Animal',
+        pilar1_desc:   'Garantim que cada local certificat compleix estàndards d\'acollida i benestar per als animals de companyia.',
+        pilar2_title:  'Dinamització Econòmica',
+        pilar2_desc:   'Els establiments PetFriendly certificats augmenten el seu tiquet mitjà un 23% en ampliar la seva clientela potencial.',
+        pilar3_title:  'Turisme de Qualitat',
+        pilar3_desc:   'El turisme amb mascotes creix un 18% anual. Un directori oficial posiciona la ciutat com a destinació PetFriendly a nivell nacional.',
+        pilar4_title:  'Imatge Institucional',
+        pilar4_desc:   'Una ciutat que certifica el benestar animal transmet valors moderns, inclusius i compromesos amb la seva comunitat.',
+        instit_cta1:   'Veure procés d\'adhesió →',
+        instit_cta2:   'Sol·licitar informació',
+        instit_quote:  '"La certificació PetPioneer ha triplicat les visites de famílies amb mascotes a la nostra terrassa."',
+        map_eyebrow:   'Directori Geolocalitzat',
+        map_title:     'Mapa',
+        map_em:        'Viu',
+        map_sub:       'Tots els locals certificats en temps real',
+        map_search:    '🔍  Cercar local...',
+        map_cat:       'Categoria',
+        map_all:       'Tots',
+        map_host:      '🍽️ Hostaleria',
+        map_aloj:      '🏨 Allotjament',
+        map_com:       '🛍️ Comerços',
+        map_barrio:    'Barri',
+        map_allbar:    'Tots els barris',
+        news_eyebrow:  'Comunicacions Municipals',
+        news_title:    'Actualitat',
+        news_em:       'Institucional',
+        news1_tag:     'Destacat',
+        news1_date:    '12 Maig, 2026',
+        news1_title:   'L\'Ajuntament llança la convocatòria oficial d\'adhesió PetPioneer 2026',
+        news1_desc:    'El programa municipal de certificació PetFriendly obre la seva primera convocatòria amb l\'objectiu d\'incorporar més de 200 establiments en els pròxims sis mesos.',
+        news2_date:    '8 Maig, 2026',
+        news2_title:   'Nova normativa d\'accés per a mascotes en espais públics',
+        news2_desc:    'El ple aprova l\'actualització del reglament municipal per facilitar l\'accés en zones verdes i terrasses certificades.',
+        news3_date:    '3 Maig, 2026',
+        news3_title:   'Primers 47 locals reben el distintiu PetPioneer',
+        news3_desc:    'La primera fase conclou amb èxit: 47 establiments ja llueixen el segell oficial.',
+        news4_date:    '28 Abril, 2026',
+        news4_title:   'Taller gratuït: Com atendre millor els clients amb mascotes',
+        news4_desc:    'L\'Ajuntament organitza una jornada formativa per a propietaris interessats en la certificació.',
+        cert_eyebrow:  'Procés d\'Adhesió',
+        cert_title:    'Com',
+        cert_em:       'certificar-se',
+        cert_s1t:      'Sol·licitud Oficial',
+        cert_s1d:      'Omple el formulari amb les dades fiscals i els serveis PetFriendly que ofereixes.',
+        cert_s2t:      'Revisió Municipal',
+        cert_s2d:      'Un tècnic valida la informació i realitza una visita d\'inspecció sense cost.',
+        cert_s3t:      'Obtenció del Segell',
+        cert_s3d:      'Reps el distintiu físic i el teu establiment apareix al directori oficial.',
+        cert_s4t:      'Renovació Anual',
+        cert_s4d:      'La certificació es renova cada any per garantir la qualitat del directori.',
+        cert_cta:      'Sol·licitar Adhesió Ara',
+        cert_badge:    'Certificat Oficial',
+        modal_eyebrow: 'Sol·licitud Oficial',
+        modal_title:   'Adhesió al Programa',
+        modal_sub:     'Registre oficial PetPioneer 2026. Temps estimat: 3 minuts.',
+        f_nombre:      'Nom Fiscal *',
+        f_nombre_ph:   'Restaurant El Caní S.L.',
+        f_cif:         'CIF / NIF *',
+        f_cat_label:   'Categoria *',
+        f_cat_ph:      'Seleccionar...',
+        f_contacto:    'Persona de Contacte *',
+        f_contacto_ph: 'Nom complet',
+        f_tel:         'Telèfon *',
+        f_email:       'Correu Electrònic *',
+        f_servicios:   'Serveis PetFriendly',
+        f_servicios_ph:'Aigua, zona d\'ombra, menú especial...',
+        f_submit:      'Enviar Sol·licitud Oficial',
+        f_sending:     'Enviant...',
+        f_sent:        '✓ Sol·licitud Rebuda',
+        f_privacy:     'En enviar acceptes la política de privacitat de l\'Ajuntament. Resposta en 48-72h hàbils.',
+        footer_copy:   '© 2026 Ajuntament · PetPioneer. Tots els drets reservats.',
+        footer_legal:  'Avís Legal',
+        footer_priv:   'Privacitat',
+        footer_acc:    'Accessibilitat',
+        footer_cont:   'Contacte',
+        cta_llegar:    'Com arribar →',
     },
     en: {
         hero_badge:    'System active · Local Administration 2026',
@@ -1424,6 +1543,15 @@ function setTexts(map) {
     });
 }
 
+function updateMobileLang(lang) {
+    ['es','ca','en'].forEach(l => {
+        const btn = document.getElementById('mlang-'+l);
+        if (!btn) return;
+        btn.style.opacity = l === lang ? '1' : '0.5';
+        btn.style.borderColor = l === lang ? 'white' : 'transparent';
+    });
+}
+
 // ── THEME ──────────────────────────────────
 const html=document.documentElement;
 let isDark=false,mapTileLayer=null,targetColor={r:0,g:166,b:90};
@@ -1552,28 +1680,28 @@ const catMeta={
     'Comercios':  {color:'#7c3aed',bg:'#f5f0ff',emoji:'🛍️'},
 };
 const locales=[
-    {id:1, name:"Bistró del Parque",      cat:"Hostelería", barrio:"Centro",    coords:[40.4160,-3.7030],emoji:'☕',tags:["Terraza Pet","Agua gratis","Menú especial"],  photos:["https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?w=400&q=80","https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&q=80"]},
-    {id:2, name:"Hotel Pioneer",           cat:"Alojamiento",barrio:"Retiro",    coords:[40.4210,-3.7150],emoji:'🏨',tags:["Camas pet","Servicio 24h","Sin recargo"],   photos:["https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80","https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?w=400&q=80"]},
-    {id:3, name:"Tienda Organic",          cat:"Comercios",  barrio:"Salamanca", coords:[40.4100,-3.6950],emoji:'🌿',tags:["Comida ecológica","Accesorios","Nutrición"],photos:["https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=400&q=80","https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80"]},
-    {id:4, name:"Café La Jauría",          cat:"Hostelería", barrio:"Centro",    coords:[40.4140,-3.7080],emoji:'🐾',tags:["Pet café","Zona interior","Eventos"],       photos:["https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80","https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80"]},
-    {id:5, name:"Apartamentos Retiro",     cat:"Alojamiento",barrio:"Retiro",    coords:[40.4180,-3.7120],emoji:'🌳',tags:["Apartamentos","Jardín privado","Parking"],  photos:["https://images.unsplash.com/photo-1560807707-8cc77767d783?w=400&q=80","https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80"]},
-    {id:6, name:"Veterinaria Centro",      cat:"Comercios",  barrio:"Centro",    coords:[40.4170,-3.7000],emoji:'💉',tags:["Urgencias 24h","Vacunación","Grooming"],    photos:["https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=400&q=80","https://images.unsplash.com/photo-1518155317743-a8ff43ea6a5f?w=400&q=80"]},
-    {id:7, name:"El Rincón de Lola",       cat:"Hostelería", barrio:"Malasaña",  coords:[40.4230,-3.7080],emoji:'🍷',tags:["Vinos y tapas","Terraza cubierta","Sin límite de tamaño"],photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"]},
-    {id:8, name:"Peluquería Canina ÖRE",   cat:"Comercios",  barrio:"Malasaña",  coords:[40.4250,-3.7060],emoji:'✂️',tags:["Peluquería","Baño aromático","Cita previa"],photos:["https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80","https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&q=80"]},
-    {id:9, name:"Hostal La Veleta",        cat:"Alojamiento",barrio:"Malasaña",  coords:[40.4240,-3.7040],emoji:'🛏️',tags:["Hostal boutique","Desayuno incluido","2 mascotas OK"],photos:["https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80"]},
-    {id:10,name:"Taberna El Hueso",        cat:"Hostelería", barrio:"Lavapiés",  coords:[40.4080,-3.7020],emoji:'🦴',tags:["Menú del día pet","Agua siempre","Terraza grande"],photos:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80","https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&q=80"]},
-    {id:11,name:"Centro Veterinario Sur",  cat:"Comercios",  barrio:"Lavapiés",  coords:[40.4060,-3.7010],emoji:'🩺',tags:["Consultas","Emergencias","Dietética"],       photos:["https://images.unsplash.com/photo-1559153466-bf0db82d5b94?w=400&q=80","https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80"]},
-    {id:12,name:"Aparthotel Parque",       cat:"Alojamiento",barrio:"Retiro",    coords:[40.4150,-3.7180],emoji:'🌿',tags:["Vistas al Retiro","Cocina equipada","Todas las razas"],photos:["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80","https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"]},
-    {id:13,name:"Café Mandarina",          cat:"Hostelería", barrio:"Chamberí",  coords:[40.4310,-3.7050],emoji:'🍊',tags:["Desayunos","Zona chill","Snacks para mascotas"],photos:["https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80","https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80"]},
-    {id:14,name:"Tienda Todo Mascota",     cat:"Comercios",  barrio:"Chamberí",  coords:[40.4330,-3.7030],emoji:'🐶',tags:["Alimentación","Accesorios premium","Asesoría"],photos:["https://images.unsplash.com/photo-1598875184994-c58b3c9b9694?w=400&q=80","https://images.unsplash.com/photo-1601758174493-45d0a4d3e407?w=400&q=80"]},
-    {id:15,name:"Hotel Serrano Palace",    cat:"Alojamiento",barrio:"Salamanca", coords:[40.4200,-3.6880],emoji:'👑',tags:["5 estrellas","Spa pet","Menú gourmet"],       photos:["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80","https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&q=80"]},
-    {id:16,name:"El Jardín de Goya",       cat:"Hostelería", barrio:"Salamanca", coords:[40.4190,-3.6900],emoji:'🌸',tags:["Jardín privado","Carta vegana pet","Eventos"],photos:["https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&q=80","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80"]},
-    {id:17,name:"Farmacia Animal Goya",    cat:"Comercios",  barrio:"Salamanca", coords:[40.4170,-3.6870],emoji:'💊',tags:["Medicamentos","Nutrición clínica","Urgencias"], photos:["https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400&q=80","https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"]},
-    {id:18,name:"Bar La Guarida",          cat:"Hostelería", barrio:"Lavapiés",  coords:[40.4090,-3.7040],emoji:'🍺',tags:["Cerveza artesana","Pintxos","Sin restricción"],photos:["https://images.unsplash.com/photo-1555658636-6e4a36218be7?w=400&q=80","https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&q=80"]},
+    {id:1, name:"Restaurant La Barca",        cat:"Hostelería", barrio:"Platja",      coords:[41.2760,1.9760], emoji:'🐟',tags:["Terrassa pet","Bols d'aigua","Menú especial"],   photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&q=80"]},
+    {id:2, name:"Hotel Neptune Castelldefels", cat:"Alojamiento", barrio:"Platja",      coords:[41.2748,1.9798], emoji:'🏨',tags:["Habitacions pet","Servei 24h","Sense recàrrec"], photos:["https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80"]},
+    {id:3, name:"Clínica Veterinària Garraf",  cat:"Comercios",   barrio:"Centre",      coords:[41.2791,1.9832], emoji:'🩺',tags:["Urgències 24h","Vacunació","Cirurgia"],           photos:["https://images.unsplash.com/photo-1559153466-bf0db82d5b94?w=400&q=80","https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80"]},
+    {id:4, name:"Bar El Chiringuito",          cat:"Hostelería", barrio:"Platja",      coords:[41.2731,1.9744], emoji:'🍺',tags:["Terrassa platja","Pet welcome","Fresc tot l'any"], photos:["https://images.unsplash.com/photo-1555658636-6e4a36218be7?w=400&q=80","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80"]},
+    {id:5, name:"Apartaments Mar i Sol",       cat:"Alojamiento", barrio:"Platja",      coords:[41.2755,1.9810], emoji:'🌊',tags:["Vistes al mar","Terrassa privada","Gossos benvinguts"],photos:["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80","https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"]},
+    {id:6, name:"Pet Shop Castelldefels",      cat:"Comercios",   barrio:"Centre",      coords:[41.2805,1.9855], emoji:'🐾',tags:["Alimentació","Accessoris","Assessoria nutricional"],photos:["https://images.unsplash.com/photo-1598875184994-c58b3c9b9694?w=400&q=80","https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80"]},
+    {id:7, name:"Cafè del Passeig",            cat:"Hostelería", barrio:"Centre",      coords:[41.2818,1.9841], emoji:'☕',tags:["Esmorzars","Gats i gossos OK","Zona ombra"],      photos:["https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80","https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80"]},
+    {id:8, name:"Peluqueria Canina Woof",      cat:"Comercios",   barrio:"Centre",      coords:[41.2798,1.9868], emoji:'✂️',tags:["Bany aromàtic","Perruqueria","Cita prèvia"],     photos:["https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80","https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&q=80"]},
+    {id:9, name:"Hotel dels Pins",             cat:"Alojamiento", barrio:"Castelldefels",coords:[41.2832,1.9778], emoji:'🌲',tags:["Jardí privat","Zona verda","Totes les races"],   photos:["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&q=80","https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80"]},
+    {id:10,name:"Pizzeria Can Fang",           cat:"Hostelería", barrio:"Castelldefels",coords:[41.2842,1.9795], emoji:'🍕',tags:["Terrassa coberta","Pet menu","Sense límit de mida"],photos:["https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&q=80","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"]},
+    {id:11,name:"Càmping La Tortuga Ligera",   cat:"Alojamiento", barrio:"Gavà Mar",    coords:[41.2698,1.9712], emoji:'⛺',tags:["Parcel·les pet","Platja propera","Zona gossos"],  photos:["https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400&q=80","https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400&q=80"]},
+    {id:12,name:"Restaurant El Faro",          cat:"Hostelería", barrio:"Platja",      coords:[41.2720,1.9730], emoji:'🏮',tags:["Vistes al mar","Cuina mediterrània","Gos benvingut"],photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&q=80"]},
+    {id:13,name:"Farmàcia Veterinària Garraf", cat:"Comercios",   barrio:"Centre",      coords:[41.2811,1.9848], emoji:'💊',tags:["Medicaments","Nutrició clínica","Urgències"],     photos:["https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400&q=80","https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"]},
+    {id:14,name:"Surf & Dogs Beach Bar",       cat:"Hostelería", barrio:"Platja",      coords:[41.2738,1.9768], emoji:'🏄',tags:["Beach bar","Dog friendly","Lloguer taules"],     photos:["https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&q=80","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80"]},
+    {id:15,name:"Hostal Mediterrani",          cat:"Alojamiento", barrio:"Centre",      coords:[41.2822,1.9862], emoji:'🌅',tags:["Preu econòmic","2 mascotes OK","Aparcament"],    photos:["https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80","https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?w=400&q=80"]},
+    {id:16,name:"Granja Biològica Can Romeu",  cat:"Comercios",   barrio:"Castelldefels",coords:[41.2855,1.9812], emoji:'🌿',tags:["Menjar ecològic pet","Verdures fresques","Local"],photos:["https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=400&q=80","https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&q=80"]},
+    {id:17,name:"Bar Restaurante Los Pinos",   cat:"Hostelería", barrio:"Castelldefels",coords:[41.2848,1.9823], emoji:'🌴',tags:["Jardí gran","Menú diari","Gossos lliures"],       photos:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80"]},
+    {id:18,name:"Centro Canino Garraf",        cat:"Comercios",   barrio:"Gavà Mar",    coords:[41.2705,1.9722], emoji:'🐕',tags:["Adiestrament","Guarderia","Socialització"],       photos:["https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80","https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80"]},
 ];
 
 // ── MAP INIT ───────────────────────────────
-const map=L.map('map',{zoomControl:true,attributionControl:false,markerZoomAnimation:false}).setView([40.418,-3.703],14);
+const map=L.map('map',{zoomControl:true,attributionControl:false,markerZoomAnimation:false}).setView([41.2780,1.9800],14);
 mapTileLayer=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{attribution:'&copy; CartoDB'}).addTo(map);
 
 let activeMarkers=[],activeCat='all',activeSearch='',highlightedId=null;
