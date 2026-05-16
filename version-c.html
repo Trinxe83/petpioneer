@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="ca" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetPioneer | Castelldefels 2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        :root {
+            --yellow:  #FFE500;
+            --black:   #0D0D0D;
+            --white:   #FFFFFF;
+            --magenta: #FF2D6B;
+            --cyan:    #00D4FF;
+            --green:   #00E87A;
+            --orange:  #FF6B00;
+            --bg:      #FFFFFF;
+            --text:    #0D0D0D;
+            --shadow:  4px 4px 0px #0D0D0D;
+            --shadow-lg: 6px 6px 0px #0D0D0D;
+        }
+        [data-theme="dark"] {
+            --bg:    #0D0D0D;
+            --text:  #FFE500;
+            --white: #1A1A1A;
+            --shadow: 4px 4px 0px #FFE500;
+            --shadow-lg: 6px 6px 0px #FFE500;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            transition: background .3s, color .3s;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 5vw; height: 60px;
+            background: var(--yellow);
+            border-bottom: 3px solid var(--black);
+            transition: background .3s;
+        }
+        [data-theme="dark"] nav { background: var(--black); border-color: var(--yellow); }
+
+        .nav-logo-c { display: flex; align-items: center; gap: 10px; }
+        .logo-pop {
+            font-family: 'Righteous', cursive;
+            font-size: 1.4rem; color: var(--black);
+            letter-spacing: -0.01em;
+        }
+        [data-theme="dark"] .logo-pop { color: var(--yellow); }
+        .logo-pop span { color: var(--magenta); }
+        .logo-tag-pop {
+            font-size: 0.52rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--black); opacity: 0.6;
+        }
+        [data-theme="dark"] .logo-tag-pop { color: var(--yellow); }
+
+        .nav-right { display: flex; align-items: center; gap: 8px; }
+
+        .lang-pop {
+            display: flex; align-items: center; gap: 3px;
+            background: var(--white); border: 3px solid var(--black);
+            padding: 4px 8px;
+        }
+        [data-theme="dark"] .lang-pop { border-color: var(--yellow); }
+        .lang-pop-btn {
+            background: none; border: none; cursor: pointer;
+            width: 22px; height: 16px; overflow: hidden;
+            border-radius: 2px; padding: 0; opacity: 0.4;
+            transition: opacity .15s, transform .15s;
+        }
+        .lang-pop-btn img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .lang-pop-btn.active { opacity: 1; transform: scale(1.15); }
+        .lang-pop-ca {
+            background: none; border: none; cursor: pointer;
+            width: 22px; height: 16px; border-radius: 2px;
+            overflow: hidden; padding: 0; opacity: 0.4;
+            transition: opacity .15s, transform .15s;
+        }
+        .lang-pop-ca.active { opacity: 1; transform: scale(1.15); }
+
+        .theme-pop {
+            font-family: 'Nunito', sans-serif; font-size: 0.7rem; font-weight: 800;
+            background: var(--white); border: 3px solid var(--black);
+            color: var(--black); padding: 5px 12px; cursor: pointer;
+            transition: all .15s; letter-spacing: 0.04em;
+        }
+        [data-theme="dark"] .theme-pop { background: var(--black); border-color: var(--yellow); color: var(--yellow); }
+        .theme-pop:hover { background: var(--cyan); }
+
+        .join-pop {
+            font-family: 'Righteous', cursive; font-size: 0.85rem;
+            background: var(--magenta); color: var(--white);
+            border: 3px solid var(--black); padding: 6px 18px;
+            cursor: pointer; transition: transform .15s, box-shadow .15s;
+            box-shadow: var(--shadow); letter-spacing: 0.02em;
+        }
+        .join-pop:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg); }
+
+        /* ── HERO ── */
+        .hero-pop {
+            min-height: 100svh; padding-top: 60px;
+            background: var(--yellow);
+            display: grid; grid-template-columns: 1fr 1fr;
+            position: relative; overflow: hidden;
+            border-bottom: 4px solid var(--black);
+            transition: background .3s;
+        }
+        [data-theme="dark"] .hero-pop { background: var(--black); }
+
+        /* Polka dots background */
+        .hero-pop::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none; z-index: 0;
+            background-image: radial-gradient(circle, rgba(0,0,0,0.08) 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+        [data-theme="dark"] .hero-pop::before {
+            background-image: radial-gradient(circle, rgba(255,229,0,0.1) 2px, transparent 2px);
+        }
+
+        .hero-pop-left {
+            display: flex; flex-direction: column;
+            justify-content: center; padding: 4rem 3vw 4rem 5vw;
+            position: relative; z-index: 1;
+        }
+
+        .hero-pop-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--black); color: var(--yellow);
+            font-size: 0.6rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            padding: 6px 14px; margin-bottom: 1.5rem;
+            width: fit-content; border: 3px solid var(--black);
+            box-shadow: var(--shadow);
+        }
+        [data-theme="dark"] .hero-pop-badge { background: var(--yellow); color: var(--black); }
+        .badge-dot-pop { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: blink-pop 1.5s ease infinite; }
+        @keyframes blink-pop { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .hero-pop-title {
+            font-family: 'Righteous', cursive;
+            font-size: clamp(3.5rem, 7vw, 7rem);
+            line-height: 0.95; color: var(--black);
+            margin-bottom: 1.5rem; letter-spacing: -0.02em;
+        }
+        [data-theme="dark"] .hero-pop-title { color: var(--yellow); }
+        .hero-pop-title .pop-line { display: block; }
+        .hero-pop-title .pop-accent {
+            color: var(--magenta);
+            display: inline-block;
+            animation: wobble 3s ease-in-out infinite;
+        }
+        @keyframes wobble { 0%,100%{transform:rotate(-1deg)} 50%{transform:rotate(1deg)} }
+
+        .hero-pop-desc {
+            font-size: 0.95rem; line-height: 1.7; font-weight: 600;
+            color: var(--black); max-width: 380px; margin-bottom: 2rem;
+            opacity: 0.75;
+        }
+        [data-theme="dark"] .hero-pop-desc { color: var(--yellow); }
+
+        .hero-pop-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn-pop-primary {
+            font-family: 'Righteous', cursive; font-size: 0.9rem;
+            background: var(--black); color: var(--yellow);
+            border: 3px solid var(--black); padding: 12px 24px;
+            cursor: pointer; text-decoration: none; display: inline-block;
+            box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s;
+            letter-spacing: 0.02em;
+        }
+        [data-theme="dark"] .btn-pop-primary { background: var(--yellow); color: var(--black); }
+        .btn-pop-primary:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); }
+        .btn-pop-secondary {
+            font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 800;
+            background: var(--white); color: var(--black);
+            border: 3px solid var(--black); padding: 12px 20px;
+            cursor: pointer; text-decoration: none; display: inline-block;
+            box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s;
+        }
+        .btn-pop-secondary:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); background: var(--cyan); }
+
+        /* Hero right — photo in bold frame */
+        .hero-pop-right {
+            display: flex; align-items: center; justify-content: center;
+            padding: 4rem 5vw 4rem 2rem; position: relative; z-index: 1;
+        }
+        .hero-pop-photo-wrap {
+            position: relative; width: 100%; max-width: 440px;
+        }
+        .hero-pop-photo-frame {
+            width: 100%; aspect-ratio: 3/4;
+            border: 5px solid var(--black);
+            box-shadow: 10px 10px 0px var(--black);
+            overflow: hidden; position: relative;
+            transition: box-shadow .2s;
+        }
+        [data-theme="dark"] .hero-pop-photo-frame { border-color: var(--yellow); box-shadow: 10px 10px 0px var(--yellow); }
+        .hero-pop-photo-frame:hover { box-shadow: 14px 14px 0px var(--magenta); }
+        .hero-pop-photo {
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: left bottom;
+            display: block; transition: transform .4s ease;
+        }
+        .hero-pop-photo-frame:hover .hero-pop-photo { transform: scale(1.04); }
+
+        /* Sticker badges on photo */
+        .sticker {
+            position: absolute; z-index: 10;
+            font-family: 'Righteous', cursive;
+            background: var(--yellow); color: var(--black);
+            border: 3px solid var(--black);
+            padding: 8px 14px; font-size: 0.75rem;
+            box-shadow: 3px 3px 0 var(--black);
+            line-height: 1.2; text-align: center;
+        }
+        .sticker-1 { top: -18px; right: -18px; background: var(--magenta); color: var(--white); transform: rotate(8deg); }
+        .sticker-2 { bottom: -18px; left: -18px; background: var(--cyan); color: var(--black); transform: rotate(-6deg); }
+        [data-theme="dark"] .sticker { box-shadow: 3px 3px 0 var(--yellow); border-color: var(--yellow); }
+
+        /* Stats strip */
+        .stats-pop {
+            background: var(--black); color: var(--yellow);
+            display: grid; grid-template-columns: repeat(4,1fr);
+            border-bottom: 4px solid var(--black);
+            transition: background .3s;
+        }
+        [data-theme="dark"] .stats-pop { background: var(--yellow); color: var(--black); border-color: var(--yellow); }
+        .stat-pop {
+            padding: 2rem 1.5rem; text-align: center;
+            border-right: 3px solid rgba(255,229,0,0.2);
+            position: relative;
+        }
+        [data-theme="dark"] .stat-pop { border-color: rgba(0,0,0,0.15); }
+        .stat-pop:last-child { border-right: none; }
+        .stat-pop-num {
+            font-family: 'Righteous', cursive;
+            font-size: 3rem; line-height: 1; color: var(--yellow);
+            display: block; margin-bottom: 4px;
+        }
+        [data-theme="dark"] .stat-pop-num { color: var(--black); }
+        .stat-pop-label {
+            font-size: 0.62rem; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            opacity: 0.6;
+        }
+
+        /* ── WHY ── */
+        #why-pop {
+            padding: 6rem 5vw;
+            background: var(--bg);
+            position: relative;
+        }
+        .why-pop-header {
+            display: flex; align-items: baseline; gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .section-tag-pop {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--yellow); color: var(--black);
+            font-size: 0.6rem; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            padding: 5px 12px; border: 3px solid var(--black);
+            box-shadow: 3px 3px 0 var(--black);
+        }
+        [data-theme="dark"] .section-tag-pop { border-color: var(--yellow); box-shadow: 3px 3px 0 var(--yellow); }
+        .section-title-pop {
+            font-family: 'Righteous', cursive;
+            font-size: clamp(2.2rem, 4vw, 3.5rem);
+            line-height: 1; color: var(--text);
+            letter-spacing: -0.02em;
+        }
+        .section-title-pop em { font-style: normal; color: var(--magenta); }
+
+        .why-pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; }
+        .pilars-pop { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .pilar-pop {
+            background: var(--bg); border: 3px solid var(--black);
+            padding: 1.5rem; box-shadow: var(--shadow);
+            transition: transform .15s, box-shadow .15s;
+        }
+        [data-theme="dark"] .pilar-pop { border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); background: #1a1a1a; }
+        .pilar-pop:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); }
+        .pilar-pop:nth-child(1) { border-top: 6px solid var(--yellow); }
+        .pilar-pop:nth-child(2) { border-top: 6px solid var(--magenta); }
+        .pilar-pop:nth-child(3) { border-top: 6px solid var(--cyan); }
+        .pilar-pop:nth-child(4) { border-top: 6px solid var(--green); }
+        .pilar-pop-icon { font-size: 1.8rem; margin-bottom: 0.75rem; display: block; }
+        .pilar-pop-title { font-family: 'Righteous', cursive; font-size: 0.95rem; color: var(--text); margin-bottom: 0.4rem; }
+        .pilar-pop-desc { font-size: 0.76rem; color: var(--text); opacity: 0.65; line-height: 1.6; font-weight: 600; }
+
+        .why-pop-right { display: flex; flex-direction: column; gap: 20px; }
+        .why-pop-img-frame {
+            border: 4px solid var(--black); box-shadow: var(--shadow-lg);
+            overflow: hidden; position: relative;
+        }
+        [data-theme="dark"] .why-pop-img-frame { border-color: var(--yellow); box-shadow: 6px 6px 0 var(--yellow); }
+        .why-pop-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; object-position: center 30%; display: block; }
+        .why-pop-quote {
+            background: var(--magenta); color: var(--white);
+            border: 3px solid var(--black); padding: 1.5rem;
+            box-shadow: var(--shadow); position: relative;
+        }
+        [data-theme="dark"] .why-pop-quote { border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); }
+        .why-pop-quote::before {
+            content: '"'; font-family: 'Righteous', cursive;
+            font-size: 5rem; line-height: 1; color: rgba(255,255,255,0.2);
+            position: absolute; top: -10px; left: 10px;
+        }
+        .why-pop-quote-text { font-size: 0.9rem; font-weight: 700; line-height: 1.6; position: relative; z-index: 1; }
+        .why-pop-quote-src { font-size: 0.65rem; font-weight: 800; opacity: 0.8; margin-top: 0.5rem; letter-spacing: 0.06em; text-transform: uppercase; }
+        .why-pop-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+        /* ── MAP ── */
+        #map-pop { border-top: 4px solid var(--black); }
+        [data-theme="dark"] #map-pop { border-color: var(--yellow); }
+        .map-pop-header {
+            background: var(--cyan); border-bottom: 4px solid var(--black);
+            padding: 2rem 5vw; display: flex; justify-content: space-between; align-items: center;
+        }
+        [data-theme="dark"] .map-pop-header { background: #0D0D0D; border-color: var(--yellow); }
+        .map-pop-title {
+            font-family: 'Righteous', cursive;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            color: var(--black); letter-spacing: -0.02em; line-height: 1;
+        }
+        [data-theme="dark"] .map-pop-title { color: var(--cyan); }
+        .map-pop-title em { font-style: normal; color: var(--magenta); }
+
+        .map-pop-container { display: grid; grid-template-columns: 280px 1fr; }
+        .map-pop-sidebar {
+            border-right: 4px solid var(--black);
+            background: var(--bg); display: flex; flex-direction: column;
+            transition: background .3s;
+        }
+        [data-theme="dark"] .map-pop-sidebar { border-color: var(--yellow); }
+        .sidebar-pop-top { padding: 1rem; border-bottom: 3px solid var(--black); }
+        [data-theme="dark"] .sidebar-pop-top { border-color: var(--yellow); }
+        .search-pop {
+            width: 100%; background: var(--yellow);
+            border: 3px solid var(--black); padding: 9px 13px;
+            color: var(--black); font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem; font-weight: 700; outline: none;
+        }
+        [data-theme="dark"] .search-pop { background: #1a1a1a; border-color: var(--yellow); color: var(--yellow); }
+        .search-pop::placeholder { color: rgba(0,0,0,0.4); }
+        [data-theme="dark"] .search-pop::placeholder { color: rgba(255,229,0,0.4); }
+        .filter-pop-group { padding: 1rem; border-bottom: 3px solid var(--black); }
+        [data-theme="dark"] .filter-pop-group { border-color: var(--yellow); }
+        .filter-pop-label { font-size: 0.58rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text); opacity: 0.5; margin-bottom: 0.6rem; }
+        .filter-pop-chips { display: flex; flex-direction: column; gap: 5px; }
+        .filter-pop-chip {
+            display: flex; align-items: center; gap: 8px;
+            padding: 7px 10px; border: 3px solid transparent;
+            background: none; color: var(--text); font-family: 'Nunito', sans-serif;
+            font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            text-align: left; width: 100%; transition: all .15s;
+        }
+        .filter-pop-chip:hover { border-color: var(--black); background: var(--yellow); }
+        [data-theme="dark"] .filter-pop-chip:hover { border-color: var(--yellow); background: #1a1a1a; }
+        .filter-pop-chip.active { border-color: var(--black); background: var(--black); color: var(--yellow); box-shadow: 3px 3px 0 var(--yellow); }
+        [data-theme="dark"] .filter-pop-chip.active { background: var(--yellow); color: var(--black); box-shadow: 3px 3px 0 var(--black); }
+        .filter-pop-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .locale-list-pop { flex: 1; overflow-y: auto; }
+        .locale-list-pop::-webkit-scrollbar { width: 4px; }
+        .locale-list-pop::-webkit-scrollbar-thumb { background: var(--yellow); }
+        .locale-count-pop { padding: 0.6rem 1rem; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 3px solid var(--black); color: var(--text); opacity: 0.5; }
+        [data-theme="dark"] .locale-count-pop { border-color: var(--yellow); }
+        .locale-card-pop { padding: 0.85rem 1rem; border-bottom: 2px solid rgba(0,0,0,0.08); cursor: pointer; transition: background .12s; display: flex; gap: 10px; align-items: flex-start; }
+        [data-theme="dark"] .locale-card-pop { border-color: rgba(255,229,0,0.1); }
+        .locale-card-pop:hover { background: var(--yellow); }
+        [data-theme="dark"] .locale-card-pop:hover { background: #1a1a1a; }
+        .locale-card-pop.highlighted { background: var(--yellow); border-left: 4px solid var(--magenta); }
+        .locale-card-pop-emoji { font-size: 1.2rem; flex-shrink: 0; }
+        .locale-card-pop-name { font-family: 'Righteous', cursive; font-size: 0.82rem; color: var(--text); line-height: 1.2; }
+        .locale-card-pop-meta { font-size: 0.65rem; font-weight: 700; color: var(--text); opacity: 0.5; margin-top: 2px; }
+
+        .mobile-filters-pop { display: none; padding: 0.75rem 5vw; gap: 8px; overflow-x: auto; border-bottom: 3px solid var(--black); background: var(--bg); }
+        [data-theme="dark"] .mobile-filters-pop { border-color: var(--yellow); }
+        .mobile-chip-pop {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 6px 14px; border: 3px solid var(--black);
+            background: var(--bg); color: var(--text);
+            font-family: 'Nunito', sans-serif; font-size: 0.72rem; font-weight: 800;
+            cursor: pointer; white-space: nowrap; flex-shrink: 0;
+            transition: all .15s; box-shadow: 2px 2px 0 var(--black);
+        }
+        [data-theme="dark"] .mobile-chip-pop { border-color: var(--yellow); box-shadow: 2px 2px 0 var(--yellow); }
+        .mobile-chip-pop.active { background: var(--black); color: var(--yellow); }
+        [data-theme="dark"] .mobile-chip-pop.active { background: var(--yellow); color: var(--black); }
+
+        #map-pop-canvas { height: 520px; z-index: 10; }
+
+        /* Leaflet */
+        .leaflet-popup-content-wrapper { background: var(--white); border-radius: 0; padding: 0; border: 4px solid var(--black); box-shadow: 8px 8px 0 var(--black); }
+        .leaflet-popup-content { margin: 0; width: 280px !important; }
+        .leaflet-popup-tip-container { display: none; }
+        .leaflet-popup-close-button { color: var(--black) !important; top: 8px !important; right: 10px !important; font-size: 18px !important; font-weight: 900 !important; }
+        .leaflet-control-zoom { border: 3px solid var(--black) !important; border-radius: 0 !important; box-shadow: 3px 3px 0 var(--black) !important; }
+        .leaflet-control-zoom a { background: var(--yellow) !important; color: var(--black) !important; border: none !important; font-weight: 900 !important; font-size: 18px !important; }
+        .leaflet-popup { animation: pop-in .2s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes pop-in { from{opacity:0;transform:scale(0.7)} to{opacity:1;transform:scale(1)} }
+
+        /* Popup */
+        .popup-pop-img { position: relative; height: 160px; overflow: hidden; }
+        .popup-pop-cat { position: absolute; top: 8px; left: 8px; z-index: 5; padding: 4px 10px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--black); border: 2px solid var(--black); }
+        .carousel-track { display: flex; transition: transform .35s ease; height: 100%; }
+        .carousel-track img { min-width: 100%; height: 100%; object-fit: cover; }
+        .carr-pop { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; background: var(--yellow); border: 2px solid var(--black); font-size: 14px; font-weight: 900; color: var(--black); transition: background .15s; }
+        .carr-pop:hover { background: var(--magenta); color: var(--white); }
+        .popup-pop-body { padding: 1rem; background: var(--white); }
+        .popup-pop-name { font-family: 'Righteous', cursive; font-size: 1.15rem; color: var(--black); line-height: 1.2; }
+        .popup-pop-loc { font-size: 0.65rem; font-weight: 800; color: #666; margin: 3px 0 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        .popup-pop-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.9rem; }
+        .popup-pop-tag { padding: 3px 8px; background: var(--yellow); border: 2px solid var(--black); font-size: 0.6rem; font-weight: 800; color: var(--black); }
+        .popup-pop-cta { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: var(--black); color: var(--yellow); font-family: 'Righteous', cursive; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; text-decoration: none; transition: background .15s; border: none; }
+        .popup-pop-cta:hover { background: var(--magenta); color: var(--white); }
+
+        /* ── NEWS ── */
+        #news-pop {
+            padding: 6rem 5vw; background: var(--yellow);
+            border-top: 4px solid var(--black); border-bottom: 4px solid var(--black);
+            transition: background .3s;
+        }
+        [data-theme="dark"] #news-pop { background: var(--black); border-color: var(--yellow); }
+        .news-pop-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 20px; margin-top: 3rem; }
+        .news-pop-card {
+            background: var(--white); border: 3px solid var(--black);
+            box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s; cursor: default; overflow: hidden;
+        }
+        [data-theme="dark"] .news-pop-card { background: #1a1a1a; border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); }
+        .news-pop-card:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); }
+        .news-pop-card.featured { grid-row: span 2; }
+        .news-pop-img { width: 100%; aspect-ratio: 16/9; object-fit: cover; object-position: center 75%; display: block; transition: transform .4s; }
+        .news-pop-card:hover .news-pop-img { transform: scale(1.04); }
+        .news-pop-body { padding: 1.25rem; }
+        .news-pop-tag { display: inline-block; background: var(--magenta); color: var(--white); font-size: 0.58rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 10px; border: 2px solid var(--black); margin-bottom: 0.6rem; }
+        [data-theme="dark"] .news-pop-tag { border-color: var(--yellow); }
+        .news-pop-date { font-size: 0.62rem; font-weight: 800; color: var(--text); opacity: 0.5; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; }
+        .news-pop-title { font-family: 'Righteous', cursive; font-size: 1.1rem; color: var(--text); line-height: 1.25; margin-bottom: 0.5rem; }
+        .news-pop-card.featured .news-pop-title { font-size: 1.5rem; }
+        .news-pop-desc { font-size: 0.76rem; color: var(--text); opacity: 0.65; line-height: 1.7; font-weight: 600; }
+
+        /* ── CERT ── */
+        #cert-pop {
+            padding: 6rem 5vw; background: var(--bg);
+            border-bottom: 4px solid var(--black); transition: background .3s;
+        }
+        [data-theme="dark"] #cert-pop { border-color: var(--yellow); }
+        .cert-pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .cert-pop-steps { display: flex; flex-direction: column; gap: 0; margin-top: 2rem; }
+        .cert-pop-step { display: flex; gap: 1.25rem; padding: 1.5rem 0; border-bottom: 2px dashed rgba(0,0,0,0.15); align-items: flex-start; transition: padding .2s; }
+        [data-theme="dark"] .cert-pop-step { border-color: rgba(255,229,0,0.2); }
+        .cert-pop-step:last-child { border-bottom: none; }
+        .cert-pop-step:hover { padding-left: 0.5rem; }
+        .cert-pop-num {
+            font-family: 'Righteous', cursive; font-size: 1.5rem;
+            color: var(--yellow); background: var(--black);
+            width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+            border: 3px solid var(--black); flex-shrink: 0; box-shadow: 3px 3px 0 var(--magenta);
+        }
+        [data-theme="dark"] .cert-pop-num { color: var(--black); background: var(--yellow); }
+        .cert-pop-step-title { font-family: 'Righteous', cursive; font-size: 0.95rem; color: var(--text); margin-bottom: 3px; }
+        .cert-pop-step-desc { font-size: 0.76rem; color: var(--text); opacity: 0.65; line-height: 1.6; font-weight: 600; }
+
+        /* Badge */
+        .cert-pop-badge-wrap { display: flex; justify-content: center; }
+        .cert-pop-badge {
+            width: 280px; height: 280px;
+            background: var(--yellow); border: 5px solid var(--black);
+            box-shadow: 12px 12px 0 var(--black);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; text-align: center;
+            transition: transform .2s;
+        }
+        [data-theme="dark"] .cert-pop-badge { background: var(--black); border-color: var(--yellow); box-shadow: 12px 12px 0 var(--yellow); color: var(--yellow); }
+        .cert-pop-badge:hover { transform: rotate(-2deg); }
+        .cert-pop-badge-emoji { font-size: 3rem; margin-bottom: 0.5rem; display: block; animation: spin-slow 8s linear infinite; }
+        @keyframes spin-slow { 0%,90%{transform:rotate(0)} 95%{transform:rotate(360deg)} 100%{transform:rotate(360deg)} }
+        .cert-pop-badge-title { font-family: 'Righteous', cursive; font-size: 1rem; color: var(--black); letter-spacing: 0.08em; text-transform: uppercase; }
+        [data-theme="dark"] .cert-pop-badge-title { color: var(--yellow); }
+        .cert-pop-badge-year { font-family: 'Righteous', cursive; font-size: 3.5rem; color: var(--black); line-height: 1; }
+        [data-theme="dark"] .cert-pop-badge-year { color: var(--yellow); }
+        .cert-pop-badge-sub { font-size: 0.6rem; font-weight: 800; color: var(--black); opacity: 0.5; text-transform: uppercase; letter-spacing: 0.12em; margin-top: 4px; }
+        [data-theme="dark"] .cert-pop-badge-sub { color: var(--yellow); }
+
+        .btn-pop-cert {
+            font-family: 'Righteous', cursive; font-size: 0.9rem;
+            background: var(--magenta); color: var(--white);
+            border: 3px solid var(--black); padding: 14px 28px;
+            cursor: pointer; margin-top: 2rem; display: inline-block;
+            text-decoration: none; box-shadow: var(--shadow);
+            transition: transform .15s, box-shadow .15s;
+        }
+        [data-theme="dark"] .btn-pop-cert { border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); }
+        .btn-pop-cert:hover { transform: translate(-3px,-3px); box-shadow: var(--shadow-lg); }
+
+        /* ── FOOTER ── */
+        .footer-pop {
+            background: var(--black); color: var(--yellow);
+            border-top: 4px solid var(--black);
+            padding: 2.5rem 5vw;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: background .3s;
+        }
+        [data-theme="dark"] .footer-pop { background: #050505; border-color: var(--yellow); }
+        .footer-pop-logo { font-family: 'Righteous', cursive; font-size: 1.1rem; color: var(--yellow); }
+        .footer-pop-logo span { color: var(--magenta); }
+        .footer-pop-copy { font-size: 0.65rem; font-weight: 700; color: rgba(255,229,0,0.5); margin-top: 3px; }
+        .footer-pop-addr { font-size: 0.62rem; font-weight: 700; color: rgba(255,229,0,0.4); margin-top: 2px; }
+        .footer-pop-links { display: flex; gap: 1.5rem; }
+        .footer-pop-links a { font-size: 0.65rem; font-weight: 800; color: rgba(255,229,0,0.5); text-decoration: none; transition: color .2s; letter-spacing: 0.04em; }
+        .footer-pop-links a:hover { color: var(--yellow); }
+
+        /* ── MODAL ── */
+        .modal-pop-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.7); display: none; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-pop-overlay.open { display: flex; }
+        .modal-pop {
+            background: var(--bg); width: 100%; max-width: 600px;
+            border: 4px solid var(--black); box-shadow: 12px 12px 0 var(--black);
+            position: relative; max-height: 90vh; overflow-y: auto;
+            animation: pop-in .3s cubic-bezier(0.34,1.4,0.64,1);
+            transition: background .3s;
+        }
+        [data-theme="dark"] .modal-pop { border-color: var(--yellow); box-shadow: 12px 12px 0 var(--yellow); }
+        .modal-pop::-webkit-scrollbar { width: 4px; }
+        .modal-pop::-webkit-scrollbar-thumb { background: var(--yellow); }
+        .modal-pop-header { padding: 2rem 2rem 1.5rem; border-bottom: 3px solid var(--black); background: var(--yellow); }
+        [data-theme="dark"] .modal-pop-header { background: #1a1a1a; border-color: var(--yellow); }
+        .modal-pop-close { position: absolute; top: 1rem; right: 1rem; background: var(--black); border: 3px solid var(--black); color: var(--yellow); width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; transition: all .2s; }
+        .modal-pop-close:hover { background: var(--magenta); }
+        .modal-pop-body { padding: 1.75rem 2rem; }
+        .field-pop-wrap { display: flex; flex-direction: column; gap: 5px; }
+        .field-pop-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text); opacity: 0.6; }
+        .field-pop-input, .field-pop-select, .field-pop-textarea { width: 100%; background: var(--bg); border: 3px solid var(--black); padding: 10px 13px; color: var(--text); font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700; outline: none; transition: border-color .15s, box-shadow .15s; }
+        [data-theme="dark"] .field-pop-input, [data-theme="dark"] .field-pop-select, [data-theme="dark"] .field-pop-textarea { border-color: var(--yellow); background: #1a1a1a; }
+        .field-pop-input:focus, .field-pop-select:focus, .field-pop-textarea:focus { border-color: var(--magenta); box-shadow: 3px 3px 0 var(--magenta); }
+        .field-pop-input::placeholder, .field-pop-textarea::placeholder { opacity: 0.4; }
+        .field-pop-select { appearance: none; cursor: pointer; }
+        .field-pop-input.error { border-color: var(--magenta); }
+        .field-pop-error { font-size: 0.65rem; font-weight: 800; color: var(--magenta); display: none; }
+        .field-pop-error.show { display: block; }
+        .field-pop-textarea { resize: none; height: 85px; }
+        .form-pop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-pop-grid .full { grid-column: span 2; }
+        .submit-pop { width: 100%; padding: 14px; background: var(--black); border: 3px solid var(--black); color: var(--yellow); font-family: 'Righteous', cursive; font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; margin-top: 1.25rem; box-shadow: var(--shadow); transition: transform .15s, box-shadow .15s; }
+        [data-theme="dark"] .submit-pop { border-color: var(--yellow); box-shadow: 4px 4px 0 var(--yellow); }
+        .submit-pop:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg); }
+        .submit-pop.success { background: var(--green); color: var(--black); }
+
+        /* ── REVEAL ── */
+        .reveal-pop { opacity: 0; transform: translateY(24px); }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px) {
+            .hero-pop { grid-template-columns: 1fr; min-height: auto; }
+            .hero-pop-right { padding: 2rem 5vw; }
+            .hero-pop-photo-wrap { max-width: 320px; margin: 0 auto; }
+            .stats-pop { grid-template-columns: repeat(2,1fr); }
+            .stat-pop:nth-child(2) { border-right: none; }
+            .why-pop-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .pilars-pop { grid-template-columns: 1fr; }
+            .map-pop-sidebar { display: none; }
+            .mobile-filters-pop { display: flex; }
+            #map-pop-canvas { height: 380px; }
+            .news-pop-grid { grid-template-columns: 1fr; }
+            .news-pop-card.featured { grid-row: span 1; }
+            .cert-pop-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .form-pop-grid { grid-template-columns: 1fr; }
+            .form-pop-grid .full { grid-column: span 1; }
+            .footer-pop { flex-direction: column; gap: 1.25rem; text-align: center; }
+            nav { padding: 0 1rem; }
+            .lang-pop { display: none; }
+            .modal-pop-header, .modal-pop-body { padding-left: 1.25rem; padding-right: 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+    <div class="nav-logo-c">
+        <div class="logo-pop">Pet<span>Pioneer</span></div>
+        <div class="logo-tag-pop" data-i18n="nav_sub">Directori Municipal</div>
+    </div>
+    <div class="nav-right">
+        <div class="lang-pop">
+            <button class="lang-pop-btn" onclick="setLangP('es')" id="lp-es" title="Español"><img src="https://flagcdn.com/w40/es.png" alt="ES"></button>
+            <button class="lang-pop-ca active" onclick="setLangP('ca')" id="lp-ca" title="Català">
+                <svg viewBox="0 0 22 16" xmlns="http://www.w3.org/2000/svg" style="width:22px;height:16px;display:block">
+                    <rect width="22" height="16" fill="#FCDD09"/>
+                    <rect y="2" width="22" height="2" fill="#DA121A"/>
+                    <rect y="6" width="22" height="2" fill="#DA121A"/>
+                    <rect y="10" width="22" height="2" fill="#DA121A"/>
+                    <rect y="14" width="22" height="2" fill="#DA121A"/>
+                </svg>
+            </button>
+            <button class="lang-pop-btn" onclick="setLangP('en')" id="lp-en" title="English"><img src="https://flagcdn.com/w40/gb.png" alt="GB"></button>
+        </div>
+        <button class="theme-pop" id="themeToggleP"><span id="toggleIconP">🌙</span> <span id="toggleLabelP" data-i18n="nav_dark">Mode fosc</span></button>
+        <button class="join-pop" id="openModalP" data-i18n="nav_join">Unir-se! →</button>
+    </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero-pop">
+    <div class="hero-pop-left">
+        <div class="hero-pop-badge" id="heroBadge">
+            <span class="badge-dot-pop"></span>
+            <span data-i18n="hero_badge">Sistema actiu · 2026</span>
+        </div>
+        <h1 class="hero-pop-title" id="heroTitleP">
+            <span class="pop-line" data-i18n="hero_title">La teva ciutat,</span>
+            <span class="pop-accent" id="heroWordP">el teu món!</span>
+        </h1>
+        <p class="hero-pop-desc" data-i18n="hero_desc">La plataforma oficial per descobrir i certificar serveis PetFriendly al municipi de Castelldefels.</p>
+        <div class="hero-pop-btns" id="heroCta">
+            <a href="#map-pop" class="btn-pop-primary" data-i18n="hero_cta1">🗺 Veure el Mapa</a>
+            <a href="#why-pop" class="btn-pop-secondary" data-i18n="hero_cta2">Per què? →</a>
+        </div>
+    </div>
+    <div class="hero-pop-right">
+        <div class="hero-pop-photo-wrap">
+            <div class="sticker sticker-1">🐾<br>PET<br>FRIENDLY!</div>
+            <div class="hero-pop-photo-frame">
+                <img class="hero-pop-photo" src="media/imagenes/perroOrilla.jpg" alt="Castelldefels PetFriendly"
+                     onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80'">
+            </div>
+            <div class="sticker sticker-2">🏖 Castelldefels<br>#PetFriendly</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ STATS ══ -->
+<div class="stats-pop">
+    <div class="stat-pop"><span class="stat-pop-num" id="statLocalesP">0</span><div class="stat-pop-label" id="sl-locals">Locals Cert.</div></div>
+    <div class="stat-pop"><span class="stat-pop-num" id="statBarrisP">0</span><div class="stat-pop-label" id="sl-barris">Barris</div></div>
+    <div class="stat-pop"><span class="stat-pop-num">4.8⭐</span><div class="stat-pop-label" id="sl-rating">Valoració</div></div>
+    <div class="stat-pop"><span class="stat-pop-num" id="statSolP">0</span><div class="stat-pop-label" id="sl-sol">Sol·licituds</div></div>
+</div>
+
+<!-- ══ WHY ══ -->
+<section id="why-pop">
+    <div class="why-pop-header reveal-pop">
+        <div class="section-tag-pop">🐶 <span data-i18n="instit_eyebrow">Per què PetPioneer</span></div>
+    </div>
+    <h2 class="section-title-pop reveal-pop" style="margin-bottom:2.5rem">
+        <span data-i18n="instit_title">Una ciutat que cuida</span> <em data-i18n="instit_em">els seus!</em>
+    </h2>
+    <div class="why-pop-grid">
+        <div>
+            <p style="font-size:0.92rem;line-height:1.8;font-weight:600;opacity:0.75;margin-bottom:2rem" class="reveal-pop" data-i18n="instit_intro">
+                El 42% de les llars de Castelldefels conviu amb una mascota. L'Ajuntament ja ha apostat per construir nous parcs canins. PetPioneer és el pas natural.
+            </p>
+            <div class="pilars-pop reveal-pop">
+                <div class="pilar-pop"><span class="pilar-pop-icon">🐾</span><div class="pilar-pop-title" id="p1t">Benestar Animal</div><div class="pilar-pop-desc" id="p1d">Estàndards d'acollida i benestar per als animals.</div></div>
+                <div class="pilar-pop"><span class="pilar-pop-icon">📈</span><div class="pilar-pop-title" id="p2t">Dinamització</div><div class="pilar-pop-desc" id="p2d">Tiquet mitjà +23% als locals certificats.</div></div>
+                <div class="pilar-pop"><span class="pilar-pop-icon">🧭</span><div class="pilar-pop-title" id="p3t">Turisme</div><div class="pilar-pop-desc" id="p3d">Castelldefels, referència PetFriendly nacional.</div></div>
+                <div class="pilar-pop"><span class="pilar-pop-icon">🏛️</span><div class="pilar-pop-title" id="p4t">Imatge</div><div class="pilar-pop-desc" id="p4d">Valors moderns i inclusius per a la comunitat.</div></div>
+            </div>
+            <div class="why-pop-ctas reveal-pop" style="margin-top:2rem">
+                <a href="#cert-pop" class="btn-pop-primary" data-i18n="instit_cta1">Procés d'adhesió →</a>
+                <button class="btn-pop-secondary" id="openModalP2" data-i18n="instit_cta2">Sol·licitar info</button>
+            </div>
+        </div>
+        <div class="why-pop-right reveal-pop">
+            <div class="why-pop-img-frame">
+                <img src="media/imagenes/tekkelVentana.jpg" class="why-pop-img" alt="Tekkel"
+                     onerror="this.src='https://images.unsplash.com/photo-1560807707-8cc77767d783?w=600&q=80'">
+            </div>
+            <div class="why-pop-quote">
+                <div class="why-pop-quote-text" data-i18n="instit_quote">"La certificació PetPioneer ha triplicat les visites de famílies amb mascotes!"</div>
+                <div class="why-pop-quote-src">— Maria G. · Restaurant La Barca · Castelldefels</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ MAP ══ -->
+<section id="map-pop">
+    <div class="map-pop-header reveal-pop">
+        <h2 class="map-pop-title"><span data-i18n="map_title">Mapa</span> <em data-i18n="map_em">Viu</em> 📍</h2>
+        <div style="font-size:0.75rem;font-weight:800;opacity:0.6" data-i18n="map_sub">Tots els locals en temps real</div>
+    </div>
+    <div class="mobile-filters-pop" id="mobileFiltersP">
+        <button class="mobile-chip-pop active" onclick="mobileFilterP('all',this)" data-i18n="map_all">Tots</button>
+        <button class="mobile-chip-pop" onclick="mobileFilterP('Hostelería',this)" data-i18n="map_host">🍽️ Hostaleria</button>
+        <button class="mobile-chip-pop" onclick="mobileFilterP('Alojamiento',this)" data-i18n="map_aloj">🏨 Allotjament</button>
+        <button class="mobile-chip-pop" onclick="mobileFilterP('Comercios',this)" data-i18n="map_com">🛍️ Comerços</button>
+    </div>
+    <div class="map-pop-container reveal-pop">
+        <div class="map-pop-sidebar">
+            <div class="sidebar-pop-top">
+                <input class="search-pop" type="text" id="searchInputP" placeholder="🔍 Cercar..." oninput="handleSearchP()">
+            </div>
+            <div class="filter-pop-group">
+                <div class="filter-pop-label" data-i18n="map_cat">Categoria</div>
+                <div class="filter-pop-chips">
+                    <button class="filter-pop-chip active" onclick="filterCatP('all',this)"><span class="filter-pop-dot" style="background:#FFE500"></span><span data-i18n="map_all">Tots</span></button>
+                    <button class="filter-pop-chip" onclick="filterCatP('Hostelería',this)"><span class="filter-pop-dot" style="background:#FF6B35"></span><span data-i18n="map_host">🍽️ Hostaleria</span></button>
+                    <button class="filter-pop-chip" onclick="filterCatP('Alojamiento',this)"><span class="filter-pop-dot" style="background:#00D4FF"></span><span data-i18n="map_aloj">🏨 Allotjament</span></button>
+                    <button class="filter-pop-chip" onclick="filterCatP('Comercios',this)"><span class="filter-pop-dot" style="background:#FF2D6B"></span><span data-i18n="map_com">🛍️ Comerços</span></button>
+                </div>
+            </div>
+            <div class="filter-pop-group" style="border-bottom:none">
+                <div class="filter-pop-label" data-i18n="map_barrio">Barri</div>
+                <select class="search-pop" id="barrioSelectP" onchange="renderMarkersP()" style="cursor:pointer">
+                    <option value="all">Tots els barris</option>
+                    <option value="Platja">Platja</option>
+                    <option value="Centre">Centre</option>
+                    <option value="Castelldefels">Castelldefels</option>
+                    <option value="Gavà Mar">Gavà Mar</option>
+                </select>
+            </div>
+            <div class="locale-count-pop" id="localeCountP"></div>
+            <div class="locale-list-pop" id="localeListP"></div>
+        </div>
+        <div id="map-pop-canvas"></div>
+    </div>
+    <div id="customPopupP" style="display:none;position:fixed;z-index:9998;pointer-events:auto;width:280px;overflow:hidden;border:4px solid #0D0D0D;box-shadow:8px 8px 0 #0D0D0D;background:white"></div>
+</section>
+
+<!-- ══ NEWS ══ -->
+<section id="news-pop">
+    <h2 class="section-title-pop reveal-pop" style="margin-bottom:0.5rem"><span data-i18n="news_title">Actualitat</span> <em data-i18n="news_em">Institucional</em> 📰</h2>
+    <div class="news-pop-grid reveal-pop">
+        <div class="news-pop-card featured">
+            <img src="https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&q=80&w=600" class="news-pop-img" alt="">
+            <div class="news-pop-body">
+                <span class="news-pop-tag" id="n1-tag">⭐ DESTACAT</span>
+                <div class="news-pop-date" id="n1-date">12 · 05 · 2026</div>
+                <h3 class="news-pop-title" id="n1-title">L'Ajuntament llança la convocatòria oficial d'adhesió PetPioneer 2026</h3>
+                <p class="news-pop-desc" id="n1-desc">El programa municipal de certificació PetFriendly obre la seva primera convocatòria.</p>
+            </div>
+        </div>
+        <div class="news-pop-card"><div class="news-pop-body"><div class="news-pop-date" id="n2-date">08 · 05 · 2026</div><h3 class="news-pop-title" id="n2-title">Nova normativa d'accés per a mascotes</h3><p class="news-pop-desc" id="n2-desc">El ple aprova la nova normativa per facilitar l'accés en zones verdes.</p></div></div>
+        <div class="news-pop-card"><div class="news-pop-body"><div class="news-pop-date" id="n3-date">03 · 05 · 2026</div><h3 class="news-pop-title" id="n3-title">47 locals ja llueixen el segell PetPioneer!</h3><p class="news-pop-desc" id="n3-desc">La primera fase conclou amb èxit rotund.</p></div></div>
+        <div class="news-pop-card"><div class="news-pop-body"><div class="news-pop-date" id="n4-date">28 · 04 · 2026</div><h3 class="news-pop-title" id="n4-title">Taller gratuït per a propietaris de locals</h3><p class="news-pop-desc" id="n4-desc">Jornada formativa per obtenir la certificació PetFriendly.</p></div></div>
+    </div>
+</section>
+
+<!-- ══ CERT ══ -->
+<section id="cert-pop">
+    <div class="section-tag-pop reveal-pop" style="margin-bottom:1.5rem">🏆 <span data-i18n="cert_eyebrow">Procés d'Adhesió</span></div>
+    <h2 class="section-title-pop reveal-pop" style="margin-bottom:0"><span data-i18n="cert_title">Com</span> <em data-i18n="cert_em">certificar-se!</em></h2>
+    <div class="cert-pop-grid" style="margin-top:2.5rem">
+        <div>
+            <div class="cert-pop-steps reveal-pop">
+                <div class="cert-pop-step"><div class="cert-pop-num">01</div><div><div class="cert-pop-step-title" id="cs1t">Sol·licitud Oficial</div><div class="cert-pop-step-desc" id="cs1d">Omple el formulari amb les dades fiscals i els serveis PetFriendly.</div></div></div>
+                <div class="cert-pop-step"><div class="cert-pop-num">02</div><div><div class="cert-pop-step-title" id="cs2t">Revisió Municipal</div><div class="cert-pop-step-desc" id="cs2d">Un tècnic valida la informació i fa una visita d'inspecció.</div></div></div>
+                <div class="cert-pop-step"><div class="cert-pop-num">03</div><div><div class="cert-pop-step-title" id="cs3t">Obtenció del Segell</div><div class="cert-pop-step-desc" id="cs3d">Reps el distintiu i aparèixes al directori oficial!</div></div></div>
+                <div class="cert-pop-step"><div class="cert-pop-num">04</div><div><div class="cert-pop-step-title" id="cs4t">Renovació Anual</div><div class="cert-pop-step-desc" id="cs4d">La certificació es renova cada any per garantir la qualitat.</div></div></div>
+            </div>
+            <a href="#" class="btn-pop-cert reveal-pop" id="openModalP3" data-i18n="cert_cta">Sol·licitar Adhesió! 🐾</a>
+        </div>
+        <div class="cert-pop-badge-wrap reveal-pop">
+            <div class="cert-pop-badge">
+                <span class="cert-pop-badge-emoji">🐾</span>
+                <div class="cert-pop-badge-title" data-i18n="cert_badge">Certificat Oficial</div>
+                <div class="cert-pop-badge-year">2026</div>
+                <div class="cert-pop-badge-sub">CASTELLDEFELS · CAT</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<div class="footer-pop">
+    <div>
+        <div class="footer-pop-logo">Pet<span>Pioneer</span></div>
+        <div class="footer-pop-copy" id="footer-copy">© 2026 Ajuntament de Castelldefels · PetPioneer</div>
+        <div class="footer-pop-addr">Plaça de l'Església 1, 08860 Castelldefels · <a href="tel:+34936651150" style="color:rgba(255,229,0,0.4);text-decoration:none">93 665 11 50</a></div>
+    </div>
+    <div class="footer-pop-links">
+        <a href="https://www.castelldefels.org/ca/avis-legal" target="_blank" id="fl-legal">Avís Legal</a>
+        <a href="https://www.castelldefels.org/ca/politica-de-privacitat" target="_blank" id="fl-priv">Privacitat</a>
+        <a href="https://www.castelldefels.org/ca/accessibilitat-web" target="_blank" id="fl-acc">Accessibilitat</a>
+        <a href="https://www.castelldefels.org/ca/contact-info" target="_blank" id="fl-cont">Contacte</a>
+    </div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="modal-pop-overlay" id="modalP">
+    <div class="modal-pop">
+        <button class="modal-pop-close" id="closeModalP">✕</button>
+        <div class="modal-pop-header">
+            <div class="section-tag-pop" style="margin-bottom:0.75rem;font-size:0.55rem" data-i18n="modal_eyebrow">Sol·licitud Oficial</div>
+            <h3 style="font-family:'Righteous',cursive;font-size:1.6rem;color:var(--black)" data-i18n="modal_title">Adhesió al Programa</h3>
+            <p style="font-size:0.78rem;font-weight:700;opacity:0.65;margin-top:0.35rem" data-i18n="modal_sub">Registre oficial PetPioneer 2026. 3 minuts!</p>
+        </div>
+        <div class="modal-pop-body">
+            <form id="regFormP" novalidate>
+                <div class="form-pop-grid">
+                    <div class="field-pop-wrap full"><label class="field-pop-label" data-i18n="f_nombre">Nom Fiscal *</label><input class="field-pop-input" type="text" id="pf-nombre" placeholder="Restaurant La Barca S.L."><span class="field-pop-error" id="pe-nombre">Camp obligatori</span></div>
+                    <div class="field-pop-wrap"><label class="field-pop-label" data-i18n="f_cif">CIF / NIF *</label><input class="field-pop-input" type="text" id="pf-cif" placeholder="B12345678"><span class="field-pop-error" id="pe-cif">Mínim 8 caràcters</span></div>
+                    <div class="field-pop-wrap"><label class="field-pop-label" data-i18n="f_cat_label">Categoria *</label>
+                        <select class="field-pop-select" id="pf-cat"><option value="">Seleccionar...</option><option>Hostelería</option><option>Alojamiento</option><option>Comercios</option></select>
+                        <span class="field-pop-error" id="pe-cat">Selecciona una categoria</span>
+                    </div>
+                    <div class="field-pop-wrap"><label class="field-pop-label" data-i18n="f_contacto">Contacte *</label><input class="field-pop-input" type="text" id="pf-contacto" placeholder="Nom complet"><span class="field-pop-error" id="pe-contacto">Camp obligatori</span></div>
+                    <div class="field-pop-wrap"><label class="field-pop-label" data-i18n="f_tel">Telèfon *</label><input class="field-pop-input" type="tel" id="pf-tel" placeholder="+34 600 000 000"><span class="field-pop-error" id="pe-tel">Mínim 9 dígits</span></div>
+                    <div class="field-pop-wrap full"><label class="field-pop-label" data-i18n="f_email">Correu *</label><input class="field-pop-input" type="email" id="pf-email" placeholder="contacte@establiment.com"><span class="field-pop-error" id="pe-email">Email no vàlid</span></div>
+                    <div class="field-pop-wrap full"><label class="field-pop-label" data-i18n="f_servicios">Serveis PetFriendly</label><textarea class="field-pop-textarea" id="pf-servicios" placeholder="Aigua, zona d'ombra, menú especial..."></textarea></div>
+                </div>
+                <button type="submit" class="submit-pop" id="submitBtnP"><span id="submitLabelP" data-i18n="f_submit">Enviar Sol·licitud! 🐾</span></button>
+                <p style="font-size:0.62rem;font-weight:700;opacity:0.5;text-align:center;margin-top:0.8rem" data-i18n="f_privacy">En enviar acceptes la política de privacitat. Resposta en 48-72h.</p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── I18N ──
+const i18nP = {
+    ca:{
+        nav_sub:'Directori Municipal', nav_join:'Unir-se! →', nav_dark:'Mode fosc', nav_light:'Mode clar',
+        hero_badge:'Sistema actiu · 2026',
+        hero_title:'La teva ciutat,',
+        hero_words:['el teu món!','la teva llar!','el teu parc!','la teva aventura!'],
+        hero_desc:'La plataforma oficial per descobrir i certificar serveis PetFriendly al municipi de Castelldefels.',
+        hero_cta1:'🗺 Veure el Mapa', hero_cta2:'Per què? →',
+        sl_locals:'Locals Cert.', sl_barris:'Barris', sl_rating:'Valoració', sl_sol:'Sol·licituds',
+        instit_eyebrow:'Per què PetPioneer', instit_title:'Una ciutat que cuida', instit_em:'els seus!',
+        instit_intro:'El 42% de les llars de Castelldefels conviu amb una mascota. L\'Ajuntament ja ha apostat per construir nous parcs canins. PetPioneer és el pas natural.',
+        p1t:'Benestar Animal', p1d:'Estàndards d\'acollida i benestar per als animals.',
+        p2t:'Dinamització', p2d:'Tiquet mitjà +23% als locals certificats.',
+        p3t:'Turisme', p3d:'Castelldefels, referència PetFriendly nacional.',
+        p4t:'Imatge', p4d:'Valors moderns i inclusius per a la comunitat.',
+        instit_cta1:'Procés d\'adhesió →', instit_cta2:'Sol·licitar info',
+        instit_quote:'"La certificació PetPioneer ha triplicat les visites de famílies amb mascotes!"',
+        map_title:'Mapa', map_em:'Viu', map_sub:'Tots els locals en temps real',
+        map_search:'🔍 Cercar...', map_cat:'Categoria', map_all:'Tots',
+        map_host:'🍽️ Hostaleria', map_aloj:'🏨 Allotjament', map_com:'🛍️ Comerços',
+        map_barrio:'Barri', map_allbar:'Tots els barris',
+        news_title:'Actualitat', news_em:'Institucional',
+        n1_tag:'⭐ DESTACAT', n1_date:'12 · 05 · 2026',
+        n1_title:'L\'Ajuntament llança la convocatòria oficial d\'adhesió PetPioneer 2026',
+        n1_desc:'El programa municipal de certificació PetFriendly obre la seva primera convocatòria.',
+        n2_date:'08 · 05 · 2026', n2_title:'Nova normativa d\'accés per a mascotes', n2_desc:'El ple aprova la nova normativa.',
+        n3_date:'03 · 05 · 2026', n3_title:'47 locals ja llueixen el segell PetPioneer!', n3_desc:'La primera fase conclou amb èxit rotund.',
+        n4_date:'28 · 04 · 2026', n4_title:'Taller gratuït per a propietaris de locals', n4_desc:'Jornada formativa per obtenir la certificació.',
+        cert_eyebrow:'Procés d\'Adhesió', cert_title:'Com', cert_em:'certificar-se!',
+        cs1t:'Sol·licitud Oficial', cs1d:'Omple el formulari amb les dades fiscals i els serveis PetFriendly.',
+        cs2t:'Revisió Municipal', cs2d:'Un tècnic valida la informació i fa una visita d\'inspecció.',
+        cs3t:'Obtenció del Segell', cs3d:'Reps el distintiu i aparèixes al directori oficial!',
+        cs4t:'Renovació Anual', cs4d:'La certificació es renova cada any per garantir la qualitat.',
+        cert_cta:'Sol·licitar Adhesió! 🐾', cert_badge:'Certificat Oficial',
+        modal_eyebrow:'Sol·licitud Oficial', modal_title:'Adhesió al Programa',
+        modal_sub:'Registre oficial PetPioneer 2026. 3 minuts!',
+        f_nombre:'Nom Fiscal *', f_cif:'CIF / NIF *', f_cat_label:'Categoria *',
+        f_contacto:'Contacte *', f_tel:'Telèfon *', f_email:'Correu *',
+        f_servicios:'Serveis PetFriendly', f_submit:'Enviar Sol·licitud! 🐾',
+        f_privacy:'En enviar acceptes la política de privacitat. Resposta en 48-72h.',
+        footer_copy:'© 2026 Ajuntament de Castelldefels · PetPioneer',
+        fl_legal:'Avís Legal', fl_priv:'Privacitat', fl_acc:'Accessibilitat', fl_cont:'Contacte',
+        cta_llegar:'Com arribar →',
+    },
+    es:{
+        nav_sub:'Directorio Municipal', nav_join:'Unirse! →', nav_dark:'Modo oscuro', nav_light:'Modo claro',
+        hero_badge:'Sistema activo · 2026',
+        hero_title:'Tu ciudad,',
+        hero_words:['tu mundo!','tu hogar!','tu parque!','tu aventura!'],
+        hero_desc:'La plataforma oficial para descubrir y certificar servicios PetFriendly en Castelldefels.',
+        hero_cta1:'🗺 Ver el Mapa', hero_cta2:'¿Por qué? →',
+        sl_locals:'Locales Cert.', sl_barris:'Barrios', sl_rating:'Valoración', sl_sol:'Solicitudes',
+        instit_eyebrow:'Por qué PetPioneer', instit_title:'Una ciudad que cuida', instit_em:'a los suyos!',
+        instit_intro:'El 42% de los hogares de Castelldefels convive con una mascota. El Ayuntamiento ya ha apostado por nuevos parques caninos. PetPioneer es el paso natural.',
+        p1t:'Bienestar Animal', p1d:'Estándares de acogida y bienestar para los animales.',
+        p2t:'Dinamización', p2d:'Ticket medio +23% en los locales certificados.',
+        p3t:'Turismo', p3d:'Castelldefels, referencia PetFriendly nacional.',
+        p4t:'Imagen', p4d:'Valores modernos e inclusivos para la comunidad.',
+        instit_cta1:'Proceso de adhesión →', instit_cta2:'Solicitar info',
+        instit_quote:'"¡La certificación PetPioneer ha triplicado las visitas de familias con mascotas!"',
+        map_title:'Mapa', map_em:'Vivo', map_sub:'Todos los locales en tiempo real',
+        map_search:'🔍 Buscar...', map_cat:'Categoría', map_all:'Todos',
+        map_host:'🍽️ Hostelería', map_aloj:'🏨 Alojamiento', map_com:'🛍️ Comercios',
+        map_barrio:'Barrio', map_allbar:'Todos los barrios',
+        news_title:'Actualidad', news_em:'Institucional',
+        n1_tag:'⭐ DESTACADO', n1_date:'12 · 05 · 2026',
+        n1_title:'El Ayuntamiento lanza la convocatoria oficial de adhesión PetPioneer 2026',
+        n1_desc:'El programa municipal de certificación PetFriendly abre su primera convocatoria.',
+        n2_date:'08 · 05 · 2026', n2_title:'Nueva normativa de acceso para mascotas', n2_desc:'El pleno aprueba la nueva normativa.',
+        n3_date:'03 · 05 · 2026', n3_title:'47 locales ya lucen el sello PetPioneer!', n3_desc:'La primera fase concluye con éxito.',
+        n4_date:'28 · 04 · 2026', n4_title:'Taller gratuito para propietarios de locales', n4_desc:'Jornada formativa para obtener la certificación.',
+        cert_eyebrow:'Proceso de Adhesión', cert_title:'Cómo', cert_em:'certificarse!',
+        cs1t:'Solicitud Oficial', cs1d:'Rellena el formulario con los datos fiscales.',
+        cs2t:'Revisión Municipal', cs2d:'Un técnico valida la información y hace una visita.',
+        cs3t:'Obtención del Sello', cs3d:'¡Recibes el distintivo y apareces en el directorio!',
+        cs4t:'Renovación Anual', cs4d:'La certificación se renueva cada año.',
+        cert_cta:'Solicitar Adhesión! 🐾', cert_badge:'Certificado Oficial',
+        modal_eyebrow:'Solicitud Oficial', modal_title:'Adhesión al Programa',
+        modal_sub:'Registro oficial PetPioneer 2026. ¡3 minutos!',
+        f_nombre:'Nombre Fiscal *', f_cif:'CIF / NIF *', f_cat_label:'Categoría *',
+        f_contacto:'Contacto *', f_tel:'Teléfono *', f_email:'Correo *',
+        f_servicios:'Servicios PetFriendly', f_submit:'Enviar Solicitud! 🐾',
+        f_privacy:'Al enviar aceptas la política de privacidad. Respuesta en 48-72h.',
+        footer_copy:'© 2026 Ajuntament de Castelldefels · PetPioneer',
+        fl_legal:'Aviso Legal', fl_priv:'Privacidad', fl_acc:'Accesibilidad', fl_cont:'Contacto',
+        cta_llegar:'Cómo llegar →',
+    },
+    en:{
+        nav_sub:'Municipal Directory', nav_join:'Join! →', nav_dark:'Dark mode', nav_light:'Light mode',
+        hero_badge:'System active · 2026',
+        hero_title:'Your city,',
+        hero_words:['your world!','your home!','your park!','your adventure!'],
+        hero_desc:'The official platform to discover and certify PetFriendly services in Castelldefels.',
+        hero_cta1:'🗺 View the Map', hero_cta2:'Why? →',
+        sl_locals:'Cert. Venues', sl_barris:'Districts', sl_rating:'Rating', sl_sol:'Requests',
+        instit_eyebrow:'Why PetPioneer', instit_title:'A city that cares', instit_em:'for its own!',
+        instit_intro:'42% of Castelldefels households live with a pet. The Council has committed to new dog parks. PetPioneer is the natural next step.',
+        p1t:'Animal Welfare', p1d:'Welcome and welfare standards for companion animals.',
+        p2t:'Economic Boost', p2d:'Average ticket +23% at certified venues.',
+        p3t:'Tourism', p3d:'Castelldefels, national PetFriendly reference.',
+        p4t:'Image', p4d:'Modern, inclusive values for the community.',
+        instit_cta1:'Accreditation process →', instit_cta2:'Request info',
+        instit_quote:'"PetPioneer certification tripled visits from families with pets!"',
+        map_title:'Live', map_em:'Map', map_sub:'All venues in real time',
+        map_search:'🔍 Search...', map_cat:'Category', map_all:'All',
+        map_host:'🍽️ Restaurants', map_aloj:'🏨 Accommodation', map_com:'🛍️ Shops',
+        map_barrio:'District', map_allbar:'All districts',
+        news_title:'Institutional', news_em:'News',
+        n1_tag:'⭐ FEATURED', n1_date:'12 · 05 · 2026',
+        n1_title:'City Council launches official PetPioneer 2026 accreditation call',
+        n1_desc:'The municipal PetFriendly certification programme opens its first call.',
+        n2_date:'08 · 05 · 2026', n2_title:'New pet access regulations', n2_desc:'The plenary approves the new regulations.',
+        n3_date:'03 · 05 · 2026', n3_title:'47 venues display the PetPioneer badge!', n3_desc:'The first phase concludes with success.',
+        n4_date:'28 · 04 · 2026', n4_title:'Free workshop for venue owners', n4_desc:'Training day to obtain PetFriendly certification.',
+        cert_eyebrow:'Accreditation Process', cert_title:'How to', cert_em:'get certified!',
+        cs1t:'Official Application', cs1d:'Fill in the form with your fiscal details.',
+        cs2t:'Municipal Review', cs2d:'A technician validates and carries out an inspection.',
+        cs3t:'Obtaining the Seal', cs3d:'You receive the badge and appear in the directory!',
+        cs4t:'Annual Renewal', cs4d:'Certification is renewed each year.',
+        cert_cta:'Apply for Accreditation! 🐾', cert_badge:'Official Certificate',
+        modal_eyebrow:'Official Application', modal_title:'Programme Accreditation',
+        modal_sub:'Official PetPioneer 2026 registration. 3 minutes!',
+        f_nombre:'Business Name *', f_cif:'Tax ID *', f_cat_label:'Category *',
+        f_contacto:'Contact *', f_tel:'Phone *', f_email:'Email *',
+        f_servicios:'PetFriendly Services', f_submit:'Submit Application! 🐾',
+        f_privacy:'By submitting you accept the privacy policy. Response within 48-72h.',
+        footer_copy:'© 2026 Ajuntament de Castelldefels · PetPioneer',
+        fl_legal:'Legal Notice', fl_priv:'Privacy', fl_acc:'Accessibility', fl_cont:'Contact',
+        cta_llegar:'Get directions →',
+    }
+};
+
+let currentLangP = 'ca';
+
+function setLangP(lang) {
+    currentLangP = lang;
+    const t = i18nP[lang];
+    document.documentElement.setAttribute('lang', lang);
+    ['es','ca','en'].forEach(l => {
+        const b = document.getElementById('lp-'+l);
+        if (b) { b.classList.toggle('active', l===lang); b.style.opacity = l===lang?'1':'0.4'; }
+    });
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n').replace(/-/g,'_');
+        if (t[k] !== undefined) el.textContent = t[k];
+    });
+    wordsP.length = 0;
+    t.hero_words.forEach(w => wordsP.push(w));
+    if (wordElP) wordElP.textContent = wordsP[0];
+    const si = document.getElementById('searchInputP');
+    if (si) si.placeholder = t.map_search;
+    const bs = document.getElementById('barrioSelectP');
+    if (bs) bs.options[0].text = t.map_allbar;
+    const tl = document.getElementById('toggleLabelP');
+    if (tl) tl.textContent = isDarkP ? t.nav_light : t.nav_dark;
+    setTP({
+        'sl-locals':t.sl_locals,'sl-barris':t.sl_barris,'sl-rating':t.sl_rating,'sl-sol':t.sl_sol,
+        'n1-tag':t.n1_tag,'n1-date':t.n1_date,'n1-title':t.n1_title,'n1-desc':t.n1_desc,
+        'n2-date':t.n2_date,'n2-title':t.n2_title,'n2-desc':t.n2_desc,
+        'n3-date':t.n3_date,'n3-title':t.n3_title,'n3-desc':t.n3_desc,
+        'n4-date':t.n4_date,'n4-title':t.n4_title,'n4-desc':t.n4_desc,
+        'cs1t':t.cs1t,'cs1d':t.cs1d,'cs2t':t.cs2t,'cs2d':t.cs2d,
+        'cs3t':t.cs3t,'cs3d':t.cs3d,'cs4t':t.cs4t,'cs4d':t.cs4d,
+        'p1t':t.p1t,'p1d':t.p1d,'p2t':t.p2t,'p2d':t.p2d,
+        'p3t':t.p3t,'p3d':t.p3d,'p4t':t.p4t,'p4d':t.p4d,
+        'footer-copy':t.footer_copy,'fl-legal':t.fl_legal,'fl-priv':t.fl_priv,
+        'fl-acc':t.fl_acc,'fl-cont':t.fl_cont,
+    });
+    const sl = document.getElementById('submitLabelP');
+    if (sl) sl.textContent = t.f_submit;
+}
+function setTP(map){ Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if(el&&val)el.textContent=val; }); }
+
+// ── THEME ──
+let isDarkP = false;
+document.getElementById('themeToggleP').addEventListener('click', () => {
+    isDarkP = !isDarkP;
+    document.body.setAttribute('data-theme', isDarkP ? 'dark' : 'light');
+    document.getElementById('toggleIconP').textContent = isDarkP ? '☀️' : '🌙';
+    document.getElementById('toggleLabelP').textContent = isDarkP ? i18nP[currentLangP].nav_light : i18nP[currentLangP].nav_dark;
+    if (mapP && mapTileP) {
+        mapP.removeLayer(mapTileP);
+        mapTileP = L.tileLayer(
+            isDarkP ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+                    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+            {attribution:'&copy; CartoDB'}).addTo(mapP);
+        document.getElementById('map-pop-canvas').style.filter = isDarkP
+            ? 'invert(1) hue-rotate(180deg) saturate(0.4)'
+            : 'saturate(1.2) brightness(1.02)';
+    }
+});
+
+// ── WORD CYCLING ──
+const wordsP = ['el teu món!','la teva llar!','el teu parc!','la teva aventura!'];
+let wordIdxP = 0;
+const wordElP = document.getElementById('heroWordP');
+if (wordElP) wordElP.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+setInterval(() => {
+    if (!wordElP) return;
+    wordElP.style.opacity = '0'; wordElP.style.transform = 'translateY(-12px) rotate(-2deg)';
+    setTimeout(() => {
+        wordIdxP = (wordIdxP+1) % wordsP.length;
+        wordElP.textContent = wordsP[wordIdxP];
+        wordElP.style.opacity = '1'; wordElP.style.transform = 'translateY(0) rotate(0deg)';
+    }, 240);
+}, 2600);
+
+// ── GSAP ──
+gsap.registerPlugin(ScrollTrigger);
+const tlP = gsap.timeline({delay:0.1});
+tlP.from('#heroBadge',{y:20,opacity:0,duration:.6,ease:'back.out(1.7)'})
+   .from('#heroTitleP',{y:50,opacity:0,duration:.9,ease:'back.out(1.5)'},'-=.3')
+   .from('.hero-pop-desc',{y:20,opacity:0,duration:.6,ease:'power3.out'},'-=.4')
+   .from('#heroCta',{y:20,opacity:0,duration:.5,ease:'back.out(1.7)'},'-=.3')
+   .from('.hero-pop-photo-wrap',{x:40,opacity:0,duration:.8,ease:'back.out(1.4)'},'-=.6')
+   .from('.sticker',{scale:0,opacity:0,duration:.5,stagger:.15,ease:'back.out(2)'},'-=.4')
+   .from('.stat-pop',{y:30,opacity:0,duration:.5,stagger:.08,ease:'back.out(1.7)'},'-=.2');
+
+gsap.utils.toArray('.reveal-pop').forEach(el => {
+    gsap.to(el,{scrollTrigger:{trigger:el,start:'top 87%',toggleActions:'play none none none'},y:0,opacity:1,duration:.7,ease:'back.out(1.4)'});
+});
+
+function counterP(id,target){
+    const el=document.getElementById(id); if(!el)return;
+    const s=performance.now();
+    (function u(now){const p=Math.min((now-s)/1400,1),e=1-Math.pow(1-p,3);el.textContent=~~(e*target);if(p<1)requestAnimationFrame(u);})(performance.now());
+}
+ScrollTrigger.create({trigger:'.stats-pop',start:'top 80%',once:true,
+    onEnter:()=>{counterP('statLocalesP',247);counterP('statBarrisP',18);counterP('statSolP',34);}
+});
+
+// ── MAP ──
+const catMetaP = {
+    'Hostelería': {color:'#FF6B35',emoji:'🍽️'},
+    'Alojamiento':{color:'#00D4FF',emoji:'🏨'},
+    'Comercios':  {color:'#FF2D6B',emoji:'🛍️'},
+};
+const localesP = [
+    {id:1,name:"Restaurant La Barca",        cat:"Hostelería", barrio:"Platja",       coords:[41.2760,1.9760],emoji:'🐟',tags:["Terrassa pet","Bols d'aigua","Menú especial"],photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&q=80"]},
+    {id:2,name:"Hotel Neptune Castelldefels", cat:"Alojamiento",barrio:"Platja",       coords:[41.2748,1.9798],emoji:'🏨',tags:["Habitacions pet","Servei 24h","Sense recàrrec"],photos:["https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80"]},
+    {id:3,name:"Clínica Veterinària Garraf",  cat:"Comercios",  barrio:"Centre",       coords:[41.2791,1.9832],emoji:'🩺',tags:["Urgències 24h","Vacunació","Cirurgia"],photos:["https://images.unsplash.com/photo-1559153466-bf0db82d5b94?w=400&q=80","https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80"]},
+    {id:4,name:"Bar El Chiringuito",          cat:"Hostelería", barrio:"Platja",       coords:[41.2731,1.9744],emoji:'🍺',tags:["Terrassa platja","Pet welcome","Fresc tot l'any"],photos:["https://images.unsplash.com/photo-1555658636-6e4a36218be7?w=400&q=80","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80"]},
+    {id:5,name:"Apartaments Mar i Sol",       cat:"Alojamiento",barrio:"Platja",       coords:[41.2755,1.9810],emoji:'🌊',tags:["Vistes al mar","Terrassa privada","Gossos benvinguts"],photos:["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80","https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"]},
+    {id:6,name:"Pet Shop Castelldefels",      cat:"Comercios",  barrio:"Centre",       coords:[41.2805,1.9855],emoji:'🐾',tags:["Alimentació","Accessoris","Assessoria"],photos:["https://images.unsplash.com/photo-1598875184994-c58b3c9b9694?w=400&q=80","https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80"]},
+    {id:7,name:"Cafè del Passeig",            cat:"Hostelería", barrio:"Centre",       coords:[41.2818,1.9841],emoji:'☕',tags:["Esmorzars","Gats i gossos OK","Zona ombra"],photos:["https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80","https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80"]},
+    {id:8,name:"Peluqueria Canina Woof",      cat:"Comercios",  barrio:"Centre",       coords:[41.2798,1.9868],emoji:'✂️',tags:["Bany aromàtic","Perruqueria","Cita prèvia"],photos:["https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80","https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&q=80"]},
+    {id:9,name:"Hotel dels Pins",             cat:"Alojamiento",barrio:"Castelldefels",coords:[41.2832,1.9778],emoji:'🌲',tags:["Jardí privat","Zona verda","Totes les races"],photos:["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&q=80","https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80"]},
+    {id:10,name:"Pizzeria Can Fang",          cat:"Hostelería", barrio:"Castelldefels",coords:[41.2842,1.9795],emoji:'🍕',tags:["Terrassa coberta","Pet menu","Sense límit"],photos:["https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&q=80","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"]},
+    {id:11,name:"Càmping La Tortuga Ligera",  cat:"Alojamiento",barrio:"Gavà Mar",     coords:[41.2698,1.9712],emoji:'⛺',tags:["Parcel·les pet","Platja propera","Zona gossos"],photos:["https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400&q=80","https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400&q=80"]},
+    {id:12,name:"Restaurant El Faro",         cat:"Hostelería", barrio:"Platja",       coords:[41.2720,1.9730],emoji:'🏮',tags:["Vistes al mar","Cuina mediterrània","Gos benvingut"],photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&q=80"]},
+    {id:13,name:"Farmàcia Veterinària Garraf",cat:"Comercios",  barrio:"Centre",       coords:[41.2811,1.9848],emoji:'💊',tags:["Medicaments","Nutrició clínica","Urgències"],photos:["https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400&q=80","https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"]},
+    {id:14,name:"Surf & Dogs Beach Bar",      cat:"Hostelería", barrio:"Platja",       coords:[41.2738,1.9768],emoji:'🏄',tags:["Beach bar","Dog friendly","Lloguer taules"],photos:["https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&q=80","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80"]},
+    {id:15,name:"Hostal Mediterrani",         cat:"Alojamiento",barrio:"Centre",       coords:[41.2822,1.9862],emoji:'🌅',tags:["Preu econòmic","2 mascotes OK","Aparcament"],photos:["https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80","https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?w=400&q=80"]},
+    {id:16,name:"Granja Biològica Can Romeu", cat:"Comercios",  barrio:"Castelldefels",coords:[41.2855,1.9812],emoji:'🌿',tags:["Menjar ecològic pet","Verdures fresques","Local"],photos:["https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=400&q=80","https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&q=80"]},
+    {id:17,name:"Bar Restaurante Los Pinos",  cat:"Hostelería", barrio:"Castelldefels",coords:[41.2848,1.9823],emoji:'🌴',tags:["Jardí gran","Menú diari","Gossos lliures"],photos:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80"]},
+    {id:18,name:"Centro Canino Garraf",       cat:"Comercios",  barrio:"Gavà Mar",     coords:[41.2705,1.9722],emoji:'🐕',tags:["Adiestrament","Guarderia","Socialització"],photos:["https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80","https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80"]},
+];
+
+const mapP = L.map('map-pop-canvas',{zoomControl:true,attributionControl:false,markerZoomAnimation:false}).setView([41.2780,1.9800],14);
+let mapTileP = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'&copy; CartoDB'}).addTo(mapP);
+document.getElementById('map-pop-canvas').style.filter = 'saturate(1.2) brightness(1.02)';
+
+let activeMarkersP=[],activeCatP='all',activeSearchP='',highlightedIdP=null;
+function getFilteredP(){
+    const b=document.getElementById('barrioSelectP')?.value||'all';
+    return localesP.filter(l=>(activeCatP==='all'||l.cat===activeCatP)&&(b==='all'||l.barrio===b)&&(activeSearchP===''||l.name.toLowerCase().includes(activeSearchP.toLowerCase())));
+}
+function renderSidebarP(filtered){
+    const cnt=document.getElementById('localeCountP');
+    if(cnt)cnt.textContent=`${filtered.length} LOCAL${filtered.length!==1?'S':''} TROBATS`;
+    document.getElementById('localeListP').innerHTML=filtered.length
+        ?filtered.map(l=>{const m=catMetaP[l.cat];return`<div class="locale-card-pop ${l.id===highlightedIdP?'highlighted':''}" onclick="focusLocaleP(${l.id})"><div class="locale-card-pop-emoji">${l.emoji||m.emoji}</div><div><div class="locale-card-pop-name">${l.name}</div><div class="locale-card-pop-meta">${l.cat} · ${l.barrio}</div></div></div>`;}).join('')
+        :`<div style="padding:2rem;font-size:.8rem;font-weight:800;opacity:0.5">— Cap resultat</div>`;
+}
+function renderMarkersP(){
+    activeMarkersP.forEach(m=>mapP.removeLayer(m));activeMarkersP=[];
+    const filtered=getFilteredP();renderSidebarP(filtered);
+    filtered.forEach(l=>{
+        const m=catMetaP[l.cat];const em=l.emoji||m.emoji;
+        const sz=window.innerWidth<900?26:32;
+        const pin=`<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform .15s" onmouseover="this.style.transform='scale(1.25) rotate(-5deg)'" onmouseout="this.style.transform='scale(1) rotate(0)'"><div style="width:${sz}px;height:${sz}px;background:${m.color};border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid #0D0D0D;box-shadow:3px 3px 0 #0D0D0D;"><span style="font-size:${sz*0.5}px;line-height:1">${em}</span></div></div>`;
+        const icon=L.divIcon({className:'',html:pin,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],popupAnchor:[0,-(sz/2+8)]});
+        const marker=L.marker(l.coords,{icon}).addTo(mapP);
+        const url=`https://www.google.com/maps/dir/?api=1&destination=${l.coords[0]},${l.coords[1]}`;
+        marker.on('click',e=>{highlightedIdP=l.id;renderSidebarP(getFilteredP());showPopupP(l,m,url,e.originalEvent);});
+        activeMarkersP.push(marker);
+    });
+}
+const customPopupP=document.getElementById('customPopupP');
+function showPopupP(l,m,url,ev){
+    const t=i18nP[currentLangP];
+    customPopupP.style.borderColor=isDarkP?'#FFE500':'#0D0D0D';
+    customPopupP.style.boxShadow=isDarkP?'8px 8px 0 #FFE500':'8px 8px 0 #0D0D0D';
+    customPopupP.style.background=isDarkP?'#1a1a1a':'white';
+    customPopupP.innerHTML=`
+        <button onclick="closePopupP()" style="position:absolute;top:6px;right:8px;z-index:10;background:#0D0D0D;border:none;color:#FFE500;width:22px;height:22px;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:900">✕</button>
+        <div class="popup-pop-img">
+            <div class="popup-pop-cat" style="background:${m.color}">${l.emoji||m.emoji} ${l.cat}</div>
+            <button class="carr-pop" style="left:6px" onclick="slideP(${l.id},-1,${l.photos.length})">‹</button>
+            <button class="carr-pop" style="right:6px" onclick="slideP(${l.id},1,${l.photos.length})">›</button>
+            <div class="carousel-track" id="trackp-${l.id}" data-idx="0">${l.photos.map(p=>`<img src="${p}" alt="${l.name}" loading="lazy">`).join('')}</div>
+        </div>
+        <div class="popup-pop-body" style="background:${isDarkP?'#1a1a1a':'white'}">
+            <div class="popup-pop-name" style="color:${isDarkP?'#FFE500':'#0D0D0D'}">${l.name}</div>
+            <div class="popup-pop-loc">${l.barrio} · ${l.cat}</div>
+            <div class="popup-pop-tags">${l.tags.map(tag=>`<span class="popup-pop-tag" style="${isDarkP?'border-color:#FFE500':''}">  ${tag}</span>`).join('')}</div>
+            <a href="${url}" target="_blank" class="popup-pop-cta">${t.cta_llegar} →</a>
+        </div>`;
+    const px=ev.clientX,py=ev.clientY;
+    customPopupP.style.left=Math.max(10,Math.min(px+15,window.innerWidth-290))+'px';
+    customPopupP.style.top=Math.max(10,Math.min(py-50,window.innerHeight-400))+'px';
+    customPopupP.style.display='block';
+}
+window.closePopupP=()=>{customPopupP.style.display='none';};
+window.slideP=function(id,step,total){const t=document.getElementById('trackp-'+id);const i=(parseInt(t.getAttribute('data-idx'))+step+total)%total;t.setAttribute('data-idx',i);t.style.transform=`translateX(-${i*100}%)`;};
+window.focusLocaleP=function(id){const l=localesP.find(x=>x.id===id);if(!l)return;highlightedIdP=id;mapP.setView(l.coords,16,{animate:true});renderSidebarP(getFilteredP());const fi=getFilteredP(),idx=fi.findIndex(x=>x.id===id);if(idx>=0&&activeMarkersP[idx])setTimeout(()=>activeMarkersP[idx].fire('click'),500);};
+function filterCatP(cat,btn){document.querySelectorAll('.filter-pop-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeCatP=cat;renderMarkersP();}
+function mobileFilterP(cat,btn){document.querySelectorAll('.mobile-chip-pop').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeCatP=cat;renderMarkersP();}
+function handleSearchP(){activeSearchP=document.getElementById('searchInputP').value;renderMarkersP();}
+document.addEventListener('click',e=>{if(customPopupP.style.display==='block'&&!customPopupP.contains(e.target)&&!e.target.closest('.leaflet-marker-icon'))closePopupP();});
+window.addEventListener('scroll',()=>closePopupP(),{passive:true});
+mapP.on('movestart zoomstart',()=>closePopupP());
+renderMarkersP();
+
+// ── MODAL ──
+const modalP=document.getElementById('modalP');
+const openMP=()=>modalP.classList.add('open');
+const closeMP=()=>modalP.classList.remove('open');
+['openModalP','openModalP2','openModalP3'].forEach(id=>{const el=document.getElementById(id);if(el)el.addEventListener('click',openMP);});
+document.getElementById('closeModalP').addEventListener('click',closeMP);
+modalP.addEventListener('click',e=>{if(e.target===modalP)closeMP();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMP();});
+
+// ── FORM ──
+function seP(id,msg){const e=document.getElementById('pf-'+id),r=document.getElementById('pe-'+id);if(e)e.classList.add('error');if(r&&msg)r.textContent=msg;if(r)r.classList.add('show');}
+function ceP(id){const e=document.getElementById('pf-'+id),r=document.getElementById('pe-'+id);if(e)e.classList.remove('error');if(r)r.classList.remove('show');}
+['nombre','cif','cat','contacto','tel','email'].forEach(id=>{const el=document.getElementById('pf-'+id);if(el)el.addEventListener('input',()=>ceP(id));});
+document.getElementById('regFormP').addEventListener('submit',function(e){
+    e.preventDefault();let ok=true;
+    const v=id=>document.getElementById('pf-'+id).value.trim();
+    if(!v('nombre')){seP('nombre');ok=false;}
+    if(v('cif').length<8){seP('cif');ok=false;}
+    if(!v('cat')){seP('cat');ok=false;}
+    if(!v('contacto')){seP('contacto');ok=false;}
+    if(v('tel').replace(/\D/g,'').length<9){seP('tel');ok=false;}
+    if(!v('email').includes('@')){seP('email');ok=false;}
+    if(!ok)return;
+    const btn=document.getElementById('submitBtnP'),lbl=document.getElementById('submitLabelP');
+    btn.disabled=true;lbl.textContent='Enviant... 🚀';
+    setTimeout(()=>{
+        btn.classList.add('success');lbl.textContent='✓ Sol·licitud Rebuda! 🎉';
+        setTimeout(()=>{closeMP();btn.disabled=false;btn.classList.remove('success');lbl.textContent=i18nP[currentLangP].f_submit;this.reset();},2200);
+    },1600);
+});
+
+// ── INIT ──
+setLangP('ca');
+</script>
+</body>
+</html>
