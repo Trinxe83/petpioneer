@@ -420,6 +420,7 @@
 
         @media(max-width:900px){
             #mobileLangBar{display:flex !important;}
+            #mobileTekkl{display:flex !important;}
             .lang-selector{display:none;}
             #dachshund{display:none !important;}
             /* Stats */
@@ -567,28 +568,28 @@
 
     <div class="hero-content">
         <div style="max-width:540px">
-            <!-- Banderas móvil — solo visibles en pantallas pequeñas -->
-            <div id="mobileLangBar" style="display:none;gap:10px;margin-bottom:1.2rem;align-items:center">
+            <!-- Banderas móvil — selector fino con pill -->
+            <div id="mobileLangBar" style="display:none;gap:0;margin-bottom:1.4rem;align-items:center;background:rgba(255,255,255,0.15);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);border-radius:50px;padding:5px 10px;width:fit-content">
                 <button onclick="setLang('es');updateMobileLang('es')" id="mlang-es"
-                    style="width:38px;height:27px;border-radius:3px;overflow:hidden;border:2.5px solid white;padding:0;cursor:pointer;opacity:1;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
+                    style="width:28px;height:20px;border-radius:3px;overflow:hidden;border:none;padding:0;cursor:pointer;opacity:0.45;background:none;margin:0 4px;transition:opacity .2s,transform .2s">
                     <img src="https://flagcdn.com/w40/es.png" style="width:100%;height:100%;object-fit:cover;display:block" alt="ES">
                 </button>
                 <button onclick="setLang('ca');updateMobileLang('ca')" id="mlang-ca"
-                    style="width:38px;height:27px;border-radius:3px;overflow:hidden;border:2.5px solid transparent;padding:0;cursor:pointer;opacity:0.55;box-shadow:0 2px 8px rgba(0,0,0,0.3);background:none">
-                    <svg viewBox="0 0 38 27" xmlns="http://www.w3.org/2000/svg" style="width:38px;height:27px;display:block">
-                        <rect width="38" height="27" fill="#FCDD09"/>
-                        <rect y="3.375" width="38" height="3.375" fill="#DA121A"/>
-                        <rect y="10.125" width="38" height="3.375" fill="#DA121A"/>
-                        <rect y="16.875" width="38" height="3.375" fill="#DA121A"/>
-                        <rect y="23.625" width="38" height="3.375" fill="#DA121A"/>
+                    style="width:28px;height:20px;border-radius:3px;overflow:hidden;border:none;padding:0;cursor:pointer;opacity:1;background:none;margin:0 4px;transition:opacity .2s,transform .2s">
+                    <svg viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:20px;display:block;border-radius:3px">
+                        <rect width="28" height="20" fill="#FCDD09"/>
+                        <rect y="2.5" width="28" height="2.5" fill="#DA121A"/>
+                        <rect y="7.5" width="28" height="2.5" fill="#DA121A"/>
+                        <rect y="12.5" width="28" height="2.5" fill="#DA121A"/>
+                        <rect y="17.5" width="28" height="2.5" fill="#DA121A"/>
                     </svg>
                 </button>
                 <button onclick="setLang('en');updateMobileLang('en')" id="mlang-en"
-                    style="width:38px;height:27px;border-radius:3px;overflow:hidden;border:2.5px solid transparent;padding:0;cursor:pointer;opacity:0.55;box-shadow:0 2px 8px rgba(0,0,0,0.3)">
+                    style="width:28px;height:20px;border-radius:3px;overflow:hidden;border:none;padding:0;cursor:pointer;opacity:0.45;background:none;margin:0 4px;transition:opacity .2s,transform .2s">
                     <img src="https://flagcdn.com/w40/gb.png" style="width:100%;height:100%;object-fit:cover;display:block" alt="EN">
                 </button>
             </div>
-            <div class="hero-badge" id="heroBadge">
+            <div class="hero-badge" id="heroBadge" style="display:none">
                 <div class="hero-badge-dot"></div>
                 <span class="label" style="color:var(--accent);font-size:.56rem" data-i18n="hero_badge">Sistema activo · Administración Local 2026</span>
             </div>
@@ -601,6 +602,14 @@
             <div style="display:flex;gap:1rem;align-items:center;margin-top:2.4rem" id="heroCta">
                 <a href="#mapa-section" style="display:inline-flex;align-items:center;gap:10px;padding:13px 26px;background:var(--accent);color:white;font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;font-weight:500;transition:background .2s" onmouseover="this.style.background='var(--accent-light)'" onmouseout="this.style.background='var(--accent)'" data-i18n="hero_cta1">Ver Mapa Interactivo →</a>
                 <a href="#institucional" style="color:var(--text-secondary);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:13px 0;border-bottom:1px solid var(--border-strong);transition:color .2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-secondary)'" data-i18n="hero_cta2">Por qué PetPioneer</a>
+            </div>
+            <!-- Tekkel solo visible en móvil -->
+            <div id="mobileTekkl" style="display:none;margin-top:2rem;align-items:center;gap:12px">
+                <img src="media/imagenes/tekkelVentana.jpg"
+                     style="width:64px;height:64px;object-fit:cover;object-position:center 30%;border-radius:50%;border:2px solid rgba(255,255,255,0.6);"
+                     alt="Tekkel PetPioneer"
+                     onerror="this.style.display='none'">
+                <p style="font-size:0.72rem;color:rgba(255,255,255,0.85);font-style:italic;line-height:1.5;font-weight:300;max-width:200px" data-i18n="instit_quote_short">"Castelldefels PetFriendly"</p>
             </div>
         </div>
     </div>
