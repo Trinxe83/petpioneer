@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="ca" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetPioneer | Castelldefels PetFriendly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fraunces:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        :root {
+            --ocean:   #0096C7;
+            --ocean-deep: #023E8A;
+            --ocean-light: #48CAE4;
+            --coral:   #FF6B6B;
+            --coral-light: #FF8E8E;
+            --sand:    #FFF3E0;
+            --sand-dark: #FFE0B2;
+            --sun:     #FFD166;
+            --green:   #06D6A0;
+            --white:   #FFFFFF;
+            --dark:    #1A1A2E;
+            --text:    #16213E;
+            --text-mid:#2C3E6B;
+            --text-muted: #8899BB;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--white);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ── WAVE BACKGROUNDS ── */
+        .wave-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .wave-bg::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0; right: 0;
+            height: 80px;
+            background: var(--white);
+            clip-path: ellipse(55% 100% at 50% 100%);
+            z-index: 3;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100svh;
+            background: linear-gradient(135deg, var(--ocean-deep) 0%, var(--ocean) 50%, var(--ocean-light) 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Bubbles */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            animation: float-bubble linear infinite;
+        }
+        @keyframes float-bubble {
+            0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+            10%  { opacity: 1; }
+            90%  { opacity: 0.6; }
+            100% { transform: translateY(-20vh) scale(1); opacity: 0; }
+        }
+
+        /* Sun rays */
+        .sun-wrap {
+            position: absolute; top: -80px; right: -80px;
+            width: 400px; height: 400px; z-index: 1;
+            animation: rotate-slow 40s linear infinite;
+        }
+        @keyframes rotate-slow { to { transform: rotate(360deg); } }
+        .sun-ray {
+            position: absolute; top: 50%; left: 50%;
+            width: 2px; height: 200px;
+            background: linear-gradient(to bottom, rgba(255,209,102,0.4), transparent);
+            transform-origin: top center;
+        }
+
+        /* Hero photo */
+        .hero-photo {
+            position: absolute; right: 0; bottom: 0;
+            width: 52%; height: 90%;
+            z-index: 2;
+        }
+        .hero-photo img {
+            width: 100%; height: 100%;
+            object-fit: cover; object-position: left bottom;
+            mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to left, rgba(0,0,0,1) 40%, transparent 100%);
+        }
+
+        /* Hero wave bottom */
+        .hero-wave {
+            position: absolute; bottom: 0; left: 0; right: 0; z-index: 4;
+        }
+
+        nav {
+            position: relative; z-index: 20;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 6vw;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .logo-bubble {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+        .logo-text {
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.3rem; font-weight: 900;
+            color: white; letter-spacing: -0.02em;
+        }
+        .logo-text span { color: var(--sun); }
+        .logo-sub {
+            font-size: 0.55rem; font-weight: 600;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 10px; }
+
+        .lang-selector-b {
+            display: flex; align-items: center; gap: 4px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px; padding: 5px 10px;
+        }
+        .lang-btn-b {
+            background: none; border: none; cursor: pointer;
+            width: 24px; height: 18px; border-radius: 3px;
+            overflow: hidden; opacity: 0.5;
+            transition: opacity 0.2s, transform 0.15s;
+            padding: 0;
+        }
+        .lang-btn-b img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .lang-btn-b.active { opacity: 1; transform: scale(1.1); }
+        .lang-btn-ca {
+            background: none; border: none; cursor: pointer;
+            width: 24px; height: 18px; border-radius: 3px;
+            overflow: hidden; opacity: 1;
+            transition: opacity 0.2s, transform 0.15s; padding: 0;
+        }
+        .lang-btn-ca.active { transform: scale(1.1); }
+
+        .theme-btn-b {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px; padding: 8px 16px;
+            color: white; font-family: 'Nunito', sans-serif;
+            font-size: 0.72rem; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 6px;
+            transition: background 0.2s;
+        }
+        .theme-btn-b:hover { background: rgba(255,255,255,0.25); }
+
+        .join-btn {
+            background: var(--sun);
+            border: none; border-radius: 50px;
+            padding: 10px 22px;
+            color: var(--dark); font-family: 'Nunito', sans-serif;
+            font-size: 0.78rem; font-weight: 800;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 20px rgba(255,209,102,0.5);
+            letter-spacing: 0.02em;
+        }
+        .join-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,209,102,0.6); }
+
+        .hero-content {
+            position: relative; z-index: 10;
+            flex: 1; display: flex; flex-direction: column;
+            justify-content: center; padding: 2rem 6vw 8rem;
+            max-width: 560px;
+        }
+
+        .hero-badge-b {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 50px; padding: 6px 16px;
+            margin-bottom: 1.5rem; width: fit-content;
+        }
+        .badge-dot-b {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse-b 2s ease infinite;
+        }
+        @keyframes pulse-b { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(0.7);opacity:0.5} }
+        .badge-text-b {
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .hero-title-b {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(3rem, 7vw, 6rem);
+            font-weight: 400; line-height: 1;
+            color: white; margin-bottom: 1.25rem;
+        }
+        .hero-title-b em {
+            font-style: italic; color: var(--sun);
+            display: block;
+        }
+        .hero-desc-b {
+            font-size: 1rem; font-weight: 500;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7; margin-bottom: 2rem;
+            max-width: 400px;
+        }
+
+        .hero-btns {
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+        .btn-primary-b {
+            background: var(--coral);
+            border: none; border-radius: 50px;
+            padding: 14px 28px;
+            color: white; font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem; font-weight: 800;
+            cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 24px rgba(255,107,107,0.45);
+            letter-spacing: 0.01em;
+        }
+        .btn-primary-b:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(255,107,107,0.55); }
+        .btn-secondary-b {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50px; padding: 14px 28px;
+            color: white; font-family: 'Nunito', sans-serif;
+            font-size: 0.82rem; font-weight: 700;
+            cursor: pointer; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-secondary-b:hover { background: rgba(255,255,255,0.25); }
+
+        /* Floating stat pills */
+        .stat-pills {
+            position: absolute; right: 3vw; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 12px;
+            z-index: 15;
+        }
+        .stat-pill {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px; padding: 14px 20px;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+            transform: translateX(80px); opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s ease;
+            min-width: 180px;
+        }
+        .stat-pill.visible { transform: translateX(0); opacity: 1; }
+        .stat-pill-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        .stat-pill-num {
+            font-family: 'Fraunces', serif;
+            font-size: 1.6rem; font-weight: 400;
+            color: var(--text); line-height: 1;
+        }
+        .stat-pill-label {
+            font-size: 0.65rem; font-weight: 700;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.06em; margin-top: 2px;
+        }
+
+        /* ── STATS BAND ── */
+        .stats-b {
+            background: var(--sand);
+            padding: 3rem 6vw;
+            display: grid; grid-template-columns: repeat(4,1fr);
+            gap: 1px; position: relative; z-index: 5;
+        }
+        .stat-b {
+            text-align: center; padding: 2rem 1rem;
+            position: relative;
+        }
+        .stat-b::after {
+            content: '';
+            position: absolute; right: 0; top: 20%; bottom: 20%;
+            width: 1px; background: var(--sand-dark);
+        }
+        .stat-b:last-child::after { display: none; }
+        .stat-num-b {
+            font-family: 'Fraunces', serif;
+            font-size: 3rem; font-weight: 400;
+            color: var(--ocean); line-height: 1;
+        }
+        .stat-label-b {
+            font-size: 0.7rem; font-weight: 700;
+            color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 0.08em; margin-top: 6px;
+        }
+
+        /* ── WHY SECTION ── */
+        #why-b {
+            padding: 6rem 6vw;
+            background: white;
+            position: relative;
+        }
+        .why-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 5rem; align-items: center;
+            margin-top: 3rem;
+        }
+        .why-img-wrap {
+            position: relative;
+        }
+        .why-img {
+            width: 100%; border-radius: 30px;
+            aspect-ratio: 4/3; object-fit: cover;
+            object-position: center 30%;
+            box-shadow: 0 30px 80px rgba(0,150,199,0.2);
+        }
+        .why-img-badge {
+            position: absolute; bottom: -20px; right: -20px;
+            background: var(--coral);
+            border-radius: 20px; padding: 16px 22px;
+            box-shadow: 0 10px 30px rgba(255,107,107,0.4);
+            color: white; text-align: center;
+        }
+        .why-img-badge-num {
+            font-family: 'Fraunces', serif;
+            font-size: 2.2rem; font-weight: 400; line-height: 1;
+        }
+        .why-img-badge-text {
+            font-size: 0.6rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            opacity: 0.85; margin-top: 4px;
+        }
+
+        .section-tag {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--sand); border-radius: 50px;
+            padding: 6px 16px; margin-bottom: 1.25rem;
+        }
+        .section-tag-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--ocean);
+        }
+        .section-tag-text {
+            font-size: 0.65rem; font-weight: 800;
+            letter-spacing: 0.12em; text-transform: uppercase;
+            color: var(--ocean);
+        }
+        .section-title-b {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            font-weight: 400; line-height: 1.1;
+            color: var(--text); margin-bottom: 1.25rem;
+        }
+        .section-title-b em { font-style: italic; color: var(--ocean); }
+        .section-desc-b {
+            font-size: 0.95rem; line-height: 1.8;
+            color: var(--text-mid); font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .pilars-b {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 16px; margin-top: 2rem;
+        }
+        .pilar-b {
+            background: var(--sand);
+            border-radius: 20px; padding: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .pilar-b:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,150,199,0.12); }
+        .pilar-b-icon { font-size: 1.8rem; margin-bottom: 0.75rem; display: block; }
+        .pilar-b-title { font-size: 0.9rem; font-weight: 800; color: var(--text); margin-bottom: 0.4rem; }
+        .pilar-b-desc { font-size: 0.76rem; color: var(--text-mid); line-height: 1.6; font-weight: 500; }
+
+        .quote-b {
+            background: linear-gradient(135deg, var(--ocean-deep), var(--ocean));
+            border-radius: 24px; padding: 2rem;
+            margin-top: 2rem; color: white;
+            position: relative; overflow: hidden;
+        }
+        .quote-b::before {
+            content: '"';
+            position: absolute; top: -20px; left: 16px;
+            font-family: 'Fraunces', serif;
+            font-size: 8rem; color: rgba(255,255,255,0.1);
+            line-height: 1;
+        }
+        .quote-b-text { font-size: 1rem; font-style: italic; line-height: 1.6; font-weight: 500; position: relative; z-index: 1; }
+        .quote-b-source { font-size: 0.68rem; font-weight: 700; margin-top: 0.75rem; opacity: 0.7; letter-spacing: 0.06em; text-transform: uppercase; }
+
+        /* ── MAP ── */
+        #map-b { padding: 6rem 0; background: var(--sand); }
+        .map-b-header { padding: 0 6vw 3rem; }
+        .map-b-container { position: relative; }
+        .map-b-sidebar {
+            position: absolute; left: 0; top: 0; bottom: 0; width: 300px;
+            z-index: 20; background: white;
+            border-radius: 0 24px 24px 0;
+            box-shadow: 4px 0 30px rgba(0,150,199,0.1);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .sidebar-b-top { padding: 1.25rem; border-bottom: 2px solid var(--sand); }
+        .search-b {
+            width: 100%; background: var(--sand);
+            border: 2px solid transparent; border-radius: 50px;
+            padding: 10px 16px;
+            color: var(--text); font-family: 'Nunito', sans-serif;
+            font-size: 0.85rem; font-weight: 600; outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-b:focus { border-color: var(--ocean); }
+        .search-b::placeholder { color: var(--text-muted); }
+
+        .filter-b-group { padding: 1.1rem 1.25rem; border-bottom: 2px solid var(--sand); }
+        .filter-b-label { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.75rem; }
+        .filter-b-chips { display: flex; flex-direction: column; gap: 6px; }
+        .filter-b-chip {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px; border-radius: 50px;
+            border: 2px solid var(--sand); background: var(--sand);
+            color: var(--text-mid); font-family: 'Nunito', sans-serif;
+            font-size: 0.8rem; font-weight: 700; cursor: pointer;
+            text-align: left; width: 100%; transition: all 0.2s;
+        }
+        .filter-b-chip:hover { border-color: var(--ocean); color: var(--ocean); background: white; }
+        .filter-b-chip.active { border-color: var(--ocean); background: var(--ocean); color: white; }
+        .filter-b-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+        .locale-list-b { flex: 1; overflow-y: auto; }
+        .locale-list-b::-webkit-scrollbar { width: 4px; }
+        .locale-list-b::-webkit-scrollbar-thumb { background: var(--ocean-light); border-radius: 4px; }
+        .locale-count-b { padding: 0.6rem 1.25rem; font-size: 0.65rem; font-weight: 700; color: var(--text-muted); border-bottom: 2px solid var(--sand); letter-spacing: 0.05em; text-transform: uppercase; }
+        .locale-card-b { padding: 1rem 1.25rem; border-bottom: 2px solid var(--sand); cursor: pointer; transition: background 0.15s; border-radius: 0; }
+        .locale-card-b:hover { background: var(--sand); }
+        .locale-card-b.highlighted { background: #E0F4FF; border-left: 4px solid var(--ocean); }
+        .locale-card-b-name { font-size: 0.85rem; font-weight: 800; color: var(--text); }
+        .locale-card-b-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; gap: 6px; margin-top: 3px; font-weight: 600; }
+        .locale-card-b-dot { width: 6px; height: 6px; border-radius: 50%; align-self: center; }
+
+        .mobile-filters-b { display: none; padding: 1rem 6vw; gap: 8px; overflow-x: auto; background: white; }
+        .mobile-chip-b {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 50px;
+            border: 2px solid var(--sand-dark); background: white;
+            font-family: 'Nunito', sans-serif; font-size: 0.75rem; font-weight: 700;
+            cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.2s;
+        }
+        .mobile-chip-b.active { background: var(--ocean); color: white; border-color: var(--ocean); }
+
+        #map-b-canvas { height: 540px; margin-left: 300px; z-index: 10; }
+
+        /* Leaflet overrides */
+        .leaflet-popup-content-wrapper { background: white; border-radius: 20px; padding: 0; box-shadow: 0 20px 50px rgba(0,150,199,0.2); border: none; }
+        .leaflet-popup-content { margin: 0; width: 285px !important; }
+        .leaflet-popup-tip { background: white; }
+        .leaflet-popup-close-button { color: var(--text-muted) !important; top: 10px !important; right: 12px !important; font-size: 18px !important; }
+        .leaflet-control-zoom { border: none !important; border-radius: 16px !important; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1) !important; }
+        .leaflet-control-zoom a { background: white !important; color: var(--ocean) !important; border: none !important; font-size: 18px !important; font-weight: 700 !important; }
+        .leaflet-popup { animation: popup-bounce 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes popup-bounce { from{opacity:0;transform:scale(0.8) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+
+        /* Popup */
+        .popup-b-img { position: relative; height: 160px; overflow: hidden; border-radius: 20px 20px 0 0; }
+        .popup-b-cat { position: absolute; top: 10px; left: 10px; z-index: 5; padding: 4px 12px; border-radius: 50px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: white; }
+        .carousel-track { display: flex; transition: transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94); height: 100%; }
+        .carousel-track img { min-width: 100%; height: 100%; object-fit: cover; }
+        .carr-b { position: absolute; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; cursor: pointer; font-size: 14px; z-index: 10; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.15); color: var(--text); font-weight: 800; transition: all 0.2s; }
+        .carr-b:hover { background: var(--ocean); color: white; }
+        .popup-b-body { padding: 1.1rem; }
+        .popup-b-name { font-family: 'Fraunces', serif; font-size: 1.2rem; font-weight: 400; color: var(--text); margin-bottom: 2px; }
+        .popup-b-loc { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        .popup-b-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 0.9rem; }
+        .popup-b-tag { padding: 3px 10px; background: var(--sand); border-radius: 50px; font-size: 0.62rem; font-weight: 700; color: var(--text-mid); }
+        .popup-b-cta { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 10px; background: var(--ocean); color: white; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; border-radius: 12px; transition: background 0.2s; }
+        .popup-b-cta:hover { background: var(--ocean-deep); }
+
+        /* ── NEWS ── */
+        #news-b { padding: 6rem 6vw; background: white; }
+        .news-grid-b { display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: auto auto; gap: 24px; margin-top: 3rem; }
+        .news-card-b { background: var(--sand); border-radius: 24px; overflow: hidden; transition: transform 0.25s, box-shadow 0.25s; cursor: default; }
+        .news-card-b:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,150,199,0.12); }
+        .news-card-b.featured { grid-row: span 2; }
+        .news-img-b { width: 100%; aspect-ratio: 16/9; object-fit: cover; object-position: center 75%; display: block; transition: transform 0.4s; }
+        .news-card-b:hover .news-img-b { transform: scale(1.03); }
+        .news-img-wrap-b { overflow: hidden; }
+        .news-body-b { padding: 1.5rem; }
+        .news-tag-b { display: inline-block; padding: 4px 12px; border-radius: 50px; background: var(--coral); color: white; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+        .news-date-b { font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+        .news-title-b { font-family: 'Fraunces', serif; font-size: 1.15rem; font-weight: 400; color: var(--text); line-height: 1.3; margin-bottom: 0.5rem; }
+        .news-card-b.featured .news-title-b { font-size: 1.6rem; }
+        .news-desc-b { font-size: 0.78rem; color: var(--text-mid); line-height: 1.7; font-weight: 500; }
+
+        /* ── CERT ── */
+        #cert-b {
+            padding: 6rem 6vw;
+            background: linear-gradient(135deg, var(--ocean-deep) 0%, var(--ocean) 100%);
+            position: relative; overflow: hidden;
+        }
+        #cert-b::before {
+            content: '🐾';
+            position: absolute; right: -60px; top: -60px;
+            font-size: 300px; opacity: 0.04;
+            transform: rotate(-20deg);
+        }
+        .cert-b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+        .cert-b-steps { display: flex; flex-direction: column; gap: 0; }
+        .cert-b-step { display: flex; gap: 1.5rem; padding: 1.75rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); align-items: flex-start; }
+        .cert-b-step:last-child { border-bottom: none; }
+        .cert-b-num {
+            width: 44px; height: 44px; border-radius: 14px;
+            background: rgba(255,255,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Fraunces', serif; font-size: 1.2rem;
+            color: var(--sun); flex-shrink: 0; font-weight: 400;
+        }
+        .cert-b-step-title { font-size: 0.9rem; font-weight: 800; color: white; margin-bottom: 4px; }
+        .cert-b-step-desc { font-size: 0.78rem; color: rgba(255,255,255,0.7); line-height: 1.6; font-weight: 500; }
+
+        .cert-b-badge-wrap { display: flex; justify-content: center; }
+        .cert-b-badge {
+            width: 300px; height: 300px;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 50%; border: 3px solid rgba(255,255,255,0.3);
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+            box-shadow: 0 0 80px rgba(255,255,255,0.1);
+        }
+        .cert-b-inner { text-align: center; }
+        .cert-b-emoji { font-size: 3.5rem; display: block; margin-bottom: 0.5rem; }
+        .cert-b-title-txt { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 900; color: white; letter-spacing: 0.1em; text-transform: uppercase; }
+        .cert-b-year { font-family: 'Fraunces', serif; font-size: 3.5rem; font-weight: 400; color: var(--sun); line-height: 1; }
+        .cert-b-sub { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+        .cert-b-orbit {
+            position: absolute; inset: -20px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 50%;
+            animation: rotate-slow 25s linear infinite;
+        }
+        .cert-b-orbit-dot {
+            position: absolute; top: -5px; left: 50%;
+            transform: translateX(-50%);
+            width: 10px; height: 10px;
+            background: var(--sun); border-radius: 50%;
+        }
+
+        /* ── MODAL ── */
+        .modal-overlay-b { position: fixed; inset: 0; z-index: 9999; background: rgba(2,62,138,0.6); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 2rem; }
+        .modal-overlay-b.open { display: flex; }
+        .modal-b {
+            background: white; width: 100%; max-width: 620px;
+            border-radius: 30px; position: relative;
+            max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 40px 100px rgba(0,100,180,0.3);
+            animation: modal-bounce 0.4s cubic-bezier(0.34,1.4,0.64,1);
+        }
+        @keyframes modal-bounce { from{opacity:0;transform:scale(0.85) translateY(20px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        .modal-b::-webkit-scrollbar { width: 4px; }
+        .modal-b::-webkit-scrollbar-thumb { background: var(--ocean-light); border-radius: 4px; }
+        .modal-b-header { padding: 2.5rem 2.5rem 2rem; border-bottom: 2px solid var(--sand); }
+        .modal-b-close { position: absolute; top: 1.5rem; right: 1.5rem; background: var(--sand); border: none; color: var(--text-muted); width: 32px; height: 32px; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 700; transition: all 0.2s; }
+        .modal-b-close:hover { background: var(--coral); color: white; }
+        .modal-b-body { padding: 2rem 2.5rem; }
+        .field-b-wrap { display: flex; flex-direction: column; gap: 6px; }
+        .field-b-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+        .field-b-input, .field-b-select, .field-b-textarea {
+            width: 100%; background: var(--sand);
+            border: 2px solid transparent; border-radius: 14px;
+            padding: 12px 16px; color: var(--text);
+            font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 600;
+            outline: none; transition: border-color 0.2s;
+        }
+        .field-b-input:focus, .field-b-select:focus, .field-b-textarea:focus { border-color: var(--ocean); background: white; }
+        .field-b-input::placeholder, .field-b-textarea::placeholder { color: var(--text-muted); }
+        .field-b-select { appearance: none; cursor: pointer; }
+        .field-b-input.error { border-color: var(--coral); }
+        .field-b-error { font-size: 0.68rem; color: var(--coral); font-weight: 700; display: none; }
+        .field-b-error.show { display: block; }
+        .field-b-textarea { resize: none; height: 90px; }
+        .form-b-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-b-grid .full { grid-column: span 2; }
+        .submit-b {
+            width: 100%; padding: 16px; background: var(--ocean);
+            border: none; border-radius: 16px; color: white;
+            font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+            font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+            cursor: pointer; margin-top: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 24px rgba(0,150,199,0.35);
+        }
+        .submit-b:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(0,150,199,0.45); }
+        .submit-b.success { background: var(--green); }
+
+        /* ── FOOTER ── */
+        footer-b-el, .footer-b {
+            background: var(--dark);
+            padding: 3rem 6vw;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .footer-b { background: var(--dark); padding: 3rem 6vw; display: flex; justify-content: space-between; align-items: center; }
+        .footer-b-logo { display: flex; align-items: center; gap: 10px; }
+        .footer-b-copy { font-size: 0.7rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 4px; }
+        .footer-b-addr { font-size: 0.65rem; color: rgba(255,255,255,0.3); font-weight: 600; margin-top: 2px; }
+        .footer-b-links { display: flex; gap: 2rem; }
+        .footer-b-links a { font-size: 0.7rem; color: rgba(255,255,255,0.4); text-decoration: none; font-weight: 700; transition: color 0.2s; }
+        .footer-b-links a:hover { color: var(--ocean-light); }
+
+        /* ── REVEAL ── */
+        .reveal-b { opacity: 0; transform: translateY(30px); }
+
+        /* ── BUTTONS in cert ── */
+        .btn-cert-b {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--sun); border: none; border-radius: 50px;
+            padding: 14px 28px; color: var(--dark);
+            font-family: 'Nunito', sans-serif; font-size: 0.82rem;
+            font-weight: 800; cursor: pointer; margin-top: 2rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 6px 24px rgba(255,209,102,0.4);
+            text-decoration: none;
+        }
+        .btn-cert-b:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(255,209,102,0.5); }
+
+        /* ── RESPONSIVE ── */
+        @media(max-width:900px){
+            .hero-photo { width: 100%; height: 50%; top: 0; bottom: auto; opacity: 0.3; }
+            .hero-photo img { mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); }
+            .hero-content { justify-content: flex-end; padding-bottom: 6rem; }
+            .stat-pills { display: none; }
+            .stats-b { grid-template-columns: repeat(2,1fr); }
+            .stat-b:nth-child(2)::after { display: none; }
+            .why-grid { grid-template-columns: 1fr; gap: 2rem; }
+            .why-img-wrap { display: none; }
+            .pilars-b { grid-template-columns: 1fr; }
+            .map-b-sidebar { display: none; }
+            .mobile-filters-b { display: flex; }
+            #map-b-canvas { margin-left: 0; height: 380px; }
+            .news-grid-b { grid-template-columns: 1fr; }
+            .news-card-b.featured { grid-row: span 1; }
+            .cert-b-grid { grid-template-columns: 1fr; gap: 3rem; }
+            .cert-b-badge-wrap { order: -1; }
+            .form-b-grid { grid-template-columns: 1fr; }
+            .form-b-grid .full { grid-column: span 1; }
+            .footer-b { flex-direction: column; gap: 1.5rem; text-align: center; }
+            nav { padding: 1rem 1.25rem; }
+            .lang-selector-b { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<header class="hero wave-bg">
+    <!-- Bubbles -->
+    <div class="bubble" style="width:80px;height:80px;left:10%;animation-duration:8s;animation-delay:0s"></div>
+    <div class="bubble" style="width:40px;height:40px;left:25%;animation-duration:12s;animation-delay:2s"></div>
+    <div class="bubble" style="width:120px;height:120px;left:70%;animation-duration:10s;animation-delay:1s"></div>
+    <div class="bubble" style="width:60px;height:60px;left:85%;animation-duration:9s;animation-delay:3s"></div>
+    <div class="bubble" style="width:30px;height:30px;left:45%;animation-duration:14s;animation-delay:0.5s"></div>
+
+    <!-- Sun -->
+    <div class="sun-wrap">
+        <div class="sun-ray" style="transform:rotate(0deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(30deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(60deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(90deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(120deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(150deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(180deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(210deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(240deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(270deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(300deg) translateX(-50%)"></div>
+        <div class="sun-ray" style="transform:rotate(330deg) translateX(-50%)"></div>
+    </div>
+
+    <!-- Dog photo -->
+    <div class="hero-photo">
+        <img src="media/imagenes/perroOrilla.jpg" alt="Gos a la platja de Castelldefels"
+             onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80'">
+    </div>
+
+    <!-- Wave -->
+    <svg class="hero-wave" viewBox="0 0 1440 80" preserveAspectRatio="none">
+        <path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,20 1440,40 L1440,80 L0,80 Z" fill="white"/>
+    </svg>
+
+    <nav>
+        <div class="nav-logo">
+            <div class="logo-bubble">🐾</div>
+            <div>
+                <div class="logo-text">Pet<span>Pioneer</span></div>
+                <div class="logo-sub" data-i18n="nav_sub">Directori Municipal</div>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="lang-selector-b">
+                <button class="lang-btn-b" onclick="setLangB('es')" title="Español" id="lb-es">
+                    <img src="https://flagcdn.com/w40/es.png" alt="ES"></button>
+                <button class="lang-btn-ca active" onclick="setLangB('ca')" title="Català" id="lb-ca">
+                    <svg viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:18px;border-radius:2px;display:block">
+                        <rect width="24" height="18" fill="#FCDD09"/>
+                        <rect y="2.25" width="24" height="2.25" fill="#DA121A"/>
+                        <rect y="6.75" width="24" height="2.25" fill="#DA121A"/>
+                        <rect y="11.25" width="24" height="2.25" fill="#DA121A"/>
+                        <rect y="15.75" width="24" height="2.25" fill="#DA121A"/>
+                    </svg>
+                </button>
+                <button class="lang-btn-b" onclick="setLangB('en')" title="English" id="lb-en">
+                    <img src="https://flagcdn.com/w40/gb.png" alt="GB"></button>
+            </div>
+            <button class="theme-btn-b" id="themeToggle">
+                <span id="toggleIcon">🌙</span>
+                <span class="toggle-label-b" data-i18n="nav_dark">Mode fosc</span>
+            </button>
+            <button class="join-btn" id="openModal" data-i18n="nav_join">Unir-se a la Xarxa</button>
+        </div>
+    </nav>
+
+    <div class="hero-content">
+        <div class="hero-badge-b" id="heroBadge">
+            <div class="badge-dot-b"></div>
+            <span class="badge-text-b" data-i18n="hero_badge">Sistema actiu · Administració Local 2026</span>
+        </div>
+        <h1 class="hero-title-b" id="heroTitle">
+            <span data-i18n="hero_title">La teva ciutat,</span>
+            <em id="heroWord">la teva llar.</em>
+        </h1>
+        <p class="hero-desc-b" data-i18n="hero_desc">
+            La plataforma oficial per descobrir i certificar serveis PetFriendly al municipi.
+        </p>
+        <div class="hero-btns" id="heroCta">
+            <a href="#map-b" class="btn-primary-b" data-i18n="hero_cta1">
+                🗺️ Veure Mapa Interactiu
+            </a>
+            <a href="#why-b" class="btn-secondary-b" data-i18n="hero_cta2">
+                Per què PetPioneer
+            </a>
+        </div>
+    </div>
+
+    <!-- Stat pills -->
+    <div class="stat-pills">
+        <div class="stat-pill" id="sp1">
+            <div class="stat-pill-icon" style="background:#E0F4FF">🐾</div>
+            <div>
+                <div class="stat-pill-num" id="statLocales">0</div>
+                <div class="stat-pill-label" id="sl-locals">Locals Certificats</div>
+            </div>
+        </div>
+        <div class="stat-pill" id="sp2">
+            <div class="stat-pill-icon" style="background:#FFF3CD">⭐</div>
+            <div>
+                <div class="stat-pill-num">4.8</div>
+                <div class="stat-pill-label" id="sl-rating">Valoració Mitjana</div>
+            </div>
+        </div>
+        <div class="stat-pill" id="sp3">
+            <div class="stat-pill-icon" style="background:#E8F8F0">🏖️</div>
+            <div>
+                <div class="stat-pill-num" id="statBarrios">0</div>
+                <div class="stat-pill-label" id="sl-barrios">Barris Adherits</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ══ STATS ══ -->
+<div class="stats-b">
+    <div class="stat-b">
+        <div class="stat-num-b" id="statLocales2">247</div>
+        <div class="stat-label-b" id="sl-locals2">Locals Certificats</div>
+    </div>
+    <div class="stat-b">
+        <div class="stat-num-b" id="statBarrios2">18</div>
+        <div class="stat-label-b" id="sl-barrios2">Barris Adherits</div>
+    </div>
+    <div class="stat-b">
+        <div class="stat-num-b">4.8</div>
+        <div class="stat-label-b" id="sl-rating2">Valoració Mitjana</div>
+    </div>
+    <div class="stat-b">
+        <div class="stat-num-b" id="statSolicitudes">34</div>
+        <div class="stat-label-b" id="sl-requests">Sol·licituds Aquest Mes</div>
+    </div>
+</div>
+
+<!-- ══ WHY ══ -->
+<section id="why-b">
+    <div class="section-tag reveal-b">
+        <div class="section-tag-dot"></div>
+        <span class="section-tag-text" data-i18n="instit_eyebrow">Per què PetPioneer</span>
+    </div>
+    <h2 class="section-title-b reveal-b">
+        <span data-i18n="instit_title">Una ciutat que cuida</span><br>
+        <em data-i18n="instit_em">els seus.</em>
+    </h2>
+    <div class="why-grid">
+        <div>
+            <p class="section-desc-b reveal-b" data-i18n="instit_intro">
+                El 42% de les llars de Castelldefels conviu amb una mascota. L'Ajuntament ja ha apostat per construir nous parcs canins a la platja i al centre de la ciutat. PetPioneer és el pas natural: un directori oficial que certifica els establiments PetFriendly i posiciona Castelldefels com a referent a Catalunya.
+            </p>
+            <div class="pilars-b reveal-b">
+                <div class="pilar-b">
+                    <span class="pilar-b-icon">🐾</span>
+                    <div class="pilar-b-title" id="p1t">Benestar Animal</div>
+                    <div class="pilar-b-desc" id="p1d">Estàndards d'acollida i benestar per als animals de companyia.</div>
+                </div>
+                <div class="pilar-b">
+                    <span class="pilar-b-icon">📈</span>
+                    <div class="pilar-b-title" id="p2t">Dinamització Econòmica</div>
+                    <div class="pilar-b-desc" id="p2d">Els locals certificats augmenten el seu tiquet mitjà un 23%.</div>
+                </div>
+                <div class="pilar-b">
+                    <span class="pilar-b-icon">🧭</span>
+                    <div class="pilar-b-title" id="p3t">Turisme de Qualitat</div>
+                    <div class="pilar-b-desc" id="p3d">Castelldefels, destinació PetFriendly de referència nacional.</div>
+                </div>
+                <div class="pilar-b">
+                    <span class="pilar-b-icon">🏛️</span>
+                    <div class="pilar-b-title" id="p4t">Imatge Institucional</div>
+                    <div class="pilar-b-desc" id="p4d">Valors moderns i inclusius compromesos amb la comunitat.</div>
+                </div>
+            </div>
+            <div style="display:flex;gap:12px;margin-top:2rem;flex-wrap:wrap" class="reveal-b">
+                <a href="#cert-b" class="btn-primary-b" data-i18n="instit_cta1">Veure procés d'adhesió →</a>
+                <button class="btn-secondary-b" id="openModal3" style="border-color:var(--ocean);color:var(--ocean);background:white" data-i18n="instit_cta2">Sol·licitar informació</button>
+            </div>
+        </div>
+        <div class="why-img-wrap reveal-b">
+            <img src="media/imagenes/tekkelVentana.jpg" class="why-img" alt="Tekkel a Castelldefels"
+                 onerror="this.src='https://images.unsplash.com/photo-1560807707-8cc77767d783?w=600&q=80'">
+            <div class="why-img-badge">
+                <div class="why-img-badge-num">🐶</div>
+                <div class="why-img-badge-text" data-i18n="instit_quote_short">Castelldefels<br>PetFriendly</div>
+            </div>
+            <div class="quote-b" style="margin-top:24px">
+                <div class="quote-b-text" data-i18n="instit_quote">"La certificació PetPioneer ha triplicat les visites de famílies amb mascotes a la nostra terrassa."</div>
+                <div class="quote-b-source">— Maria G., Restaurant La Barca · Platja de Castelldefels</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ MAP ══ -->
+<section id="map-b">
+    <div class="map-b-header reveal-b">
+        <div class="section-tag">
+            <div class="section-tag-dot"></div>
+            <span class="section-tag-text" data-i18n="map_eyebrow">Directori Geolocalitzat</span>
+        </div>
+        <h2 class="section-title-b">
+            <span data-i18n="map_title">Mapa</span> <em data-i18n="map_em">Viu</em><br>
+            <span style="font-size:0.45em;font-family:'Nunito',sans-serif;font-weight:600;color:var(--text-muted)" data-i18n="map_sub">Tots els locals certificats en temps real</span>
+        </h2>
+    </div>
+
+    <div class="mobile-filters-b" id="mobileFilters">
+        <button class="mobile-chip-b active" onclick="mobileFilterB('all',this)" data-i18n="map_all">🗂 Tots</button>
+        <button class="mobile-chip-b" onclick="mobileFilterB('Hostelería',this)" data-i18n="map_host">🍽️ Hostaleria</button>
+        <button class="mobile-chip-b" onclick="mobileFilterB('Alojamiento',this)" data-i18n="map_aloj">🏨 Allotjament</button>
+        <button class="mobile-chip-b" onclick="mobileFilterB('Comercios',this)" data-i18n="map_com">🛍️ Comerços</button>
+    </div>
+
+    <div class="map-b-container reveal-b">
+        <div class="map-b-sidebar">
+            <div class="sidebar-b-top">
+                <input class="search-b" type="text" id="searchInputB" placeholder="🔍 Cercar local..." oninput="handleSearchB()">
+            </div>
+            <div class="filter-b-group">
+                <div class="filter-b-label" data-i18n="map_cat">Categoria</div>
+                <div class="filter-b-chips">
+                    <button class="filter-b-chip active" onclick="filterCatB('all',this)">
+                        <span class="filter-b-dot" style="background:var(--ocean)"></span><span data-i18n="map_all">Tots</span>
+                    </button>
+                    <button class="filter-b-chip" onclick="filterCatB('Hostelería',this)">
+                        <span class="filter-b-dot" style="background:#FF6B35"></span><span data-i18n="map_host">🍽️ Hostaleria</span>
+                    </button>
+                    <button class="filter-b-chip" onclick="filterCatB('Alojamiento',this)">
+                        <span class="filter-b-dot" style="background:#0096C7"></span><span data-i18n="map_aloj">🏨 Allotjament</span>
+                    </button>
+                    <button class="filter-b-chip" onclick="filterCatB('Comercios',this)">
+                        <span class="filter-b-dot" style="background:#7B2FBE"></span><span data-i18n="map_com">🛍️ Comerços</span>
+                    </button>
+                </div>
+            </div>
+            <div class="filter-b-group" style="border-bottom:none">
+                <div class="filter-b-label" data-i18n="map_barrio">Barri</div>
+                <select class="search-b" id="barrioSelectB" onchange="renderMarkersB()" style="cursor:pointer;border-radius:50px">
+                    <option value="all">Tots els barris</option>
+                    <option value="Platja">Platja</option>
+                    <option value="Centre">Centre</option>
+                    <option value="Castelldefels">Castelldefels</option>
+                    <option value="Gavà Mar">Gavà Mar</option>
+                </select>
+            </div>
+            <div class="locale-count-b" id="localeCountB"></div>
+            <div class="locale-list-b" id="localeListB"></div>
+        </div>
+        <div id="map-b-canvas"></div>
+    </div>
+    <div id="customPopupB" style="display:none;position:fixed;z-index:9998;pointer-events:auto;width:285px;background:white;border-radius:20px;overflow:hidden;box-shadow:0 20px 50px rgba(0,150,199,0.2)"></div>
+</section>
+
+<!-- ══ NEWS ══ -->
+<section id="news-b">
+    <div class="section-tag reveal-b">
+        <div class="section-tag-dot" style="background:var(--coral)"></div>
+        <span class="section-tag-text" style="color:var(--coral)" data-i18n="news_eyebrow">Comunicacions Municipals</span>
+    </div>
+    <h2 class="section-title-b reveal-b">
+        <span data-i18n="news_title">Actualitat</span> <em data-i18n="news_em">Institucional</em>
+    </h2>
+    <div class="news-grid-b reveal-b">
+        <div class="news-card-b featured">
+            <div class="news-img-wrap-b">
+                <img src="https://images.unsplash.com/photo-1560807707-8cc77767d783?auto=format&fit=crop&q=80&w=600"
+                     class="news-img-b" alt="">
+            </div>
+            <div class="news-body-b">
+                <span class="news-tag-b" id="n1-tag">Destacat</span>
+                <div class="news-date-b" id="n1-date">12 Maig, 2026</div>
+                <h3 class="news-title-b" id="n1-title">L'Ajuntament llança la convocatòria oficial d'adhesió PetPioneer 2026</h3>
+                <p class="news-desc-b" id="n1-desc">El programa municipal de certificació PetFriendly obre la seva primera convocatòria amb l'objectiu d'incorporar més de 200 establiments en els pròxims sis mesos.</p>
+            </div>
+        </div>
+        <div class="news-card-b">
+            <div class="news-body-b">
+                <div class="news-date-b" id="n2-date">8 Maig, 2026</div>
+                <h3 class="news-title-b" id="n2-title">Nova normativa d'accés per a mascotes en espais públics</h3>
+                <p class="news-desc-b" id="n2-desc">El ple aprova l'actualització del reglament municipal per facilitar l'accés en zones verdes i terrasses certificades.</p>
+            </div>
+        </div>
+        <div class="news-card-b">
+            <div class="news-body-b">
+                <div class="news-date-b" id="n3-date">3 Maig, 2026</div>
+                <h3 class="news-title-b" id="n3-title">Primers 47 locals reben el distintiu PetPioneer</h3>
+                <p class="news-desc-b" id="n3-desc">La primera fase conclou amb èxit: 47 establiments ja llueixen el segell oficial.</p>
+            </div>
+        </div>
+        <div class="news-card-b">
+            <div class="news-body-b">
+                <div class="news-date-b" id="n4-date">28 Abril, 2026</div>
+                <h3 class="news-title-b" id="n4-title">Taller gratuït: Com atendre millor els clients amb mascotes</h3>
+                <p class="news-desc-b" id="n4-desc">L'Ajuntament organitza una jornada formativa per a propietaris interessats en la certificació.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ CERT ══ -->
+<section id="cert-b">
+    <div style="max-width:1400px;margin:0 auto">
+        <div class="cert-b-grid">
+            <div>
+                <div class="section-tag" style="background:rgba(255,255,255,0.15)" class="reveal-b">
+                    <div class="section-tag-dot" style="background:var(--sun)"></div>
+                    <span class="section-tag-text" style="color:var(--sun)" data-i18n="cert_eyebrow">Procés d'Adhesió</span>
+                </div>
+                <h2 class="section-title-b reveal-b" style="color:white;margin-bottom:2rem">
+                    <span data-i18n="cert_title">Com</span> <em data-i18n="cert_em" style="color:var(--sun)">certificar-se</em>
+                </h2>
+                <div class="cert-b-steps reveal-b">
+                    <div class="cert-b-step">
+                        <div class="cert-b-num">01</div>
+                        <div><div class="cert-b-step-title" id="cs1t">Sol·licitud Oficial</div><div class="cert-b-step-desc" id="cs1d">Omple el formulari amb les dades fiscals i els serveis PetFriendly que ofereixes.</div></div>
+                    </div>
+                    <div class="cert-b-step">
+                        <div class="cert-b-num">02</div>
+                        <div><div class="cert-b-step-title" id="cs2t">Revisió Municipal</div><div class="cert-b-step-desc" id="cs2d">Un tècnic valida la informació i realitza una visita d'inspecció sense cost.</div></div>
+                    </div>
+                    <div class="cert-b-step">
+                        <div class="cert-b-num">03</div>
+                        <div><div class="cert-b-step-title" id="cs3t">Obtenció del Segell</div><div class="cert-b-step-desc" id="cs3d">Reps el distintiu físic i el teu establiment apareix al directori oficial.</div></div>
+                    </div>
+                    <div class="cert-b-step">
+                        <div class="cert-b-num">04</div>
+                        <div><div class="cert-b-step-title" id="cs4t">Renovació Anual</div><div class="cert-b-step-desc" id="cs4d">La certificació es renova cada any per garantir la qualitat del directori.</div></div>
+                    </div>
+                </div>
+                <button class="btn-cert-b reveal-b" id="openModal2" data-i18n="cert_cta">Sol·licitar Adhesió Ara 🐾</button>
+            </div>
+            <div class="cert-b-badge-wrap reveal-b">
+                <div style="position:relative">
+                    <div class="cert-b-orbit"><div class="cert-b-orbit-dot"></div></div>
+                    <div class="cert-b-badge">
+                        <div class="cert-b-inner">
+                            <span class="cert-b-emoji">🐾</span>
+                            <div class="cert-b-title-txt" data-i18n="cert_badge">Certificat Oficial</div>
+                            <div class="cert-b-year">2026</div>
+                            <div class="cert-b-sub">Castelldefels · Catalunya</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<div class="footer-b">
+    <div>
+        <div class="footer-b-logo">
+            <div style="font-size:1.1rem;font-weight:900;color:white;font-family:'Nunito',sans-serif">
+                Pet<span style="color:var(--sun)">Pioneer</span>
+            </div>
+        </div>
+        <div class="footer-b-copy" id="footer-copy">© 2026 Ajuntament de Castelldefels · PetPioneer. Tots els drets reservats.</div>
+        <div class="footer-b-addr">Plaça de l'Església 1, 08860 Castelldefels · <a href="tel:+34936651150" style="color:rgba(255,255,255,0.3);text-decoration:none">93 665 11 50</a></div>
+    </div>
+    <div class="footer-b-links">
+        <a href="https://www.castelldefels.org/ca/avis-legal" target="_blank" id="fl-legal">Avís Legal</a>
+        <a href="https://www.castelldefels.org/ca/politica-de-privacitat" target="_blank" id="fl-priv">Privacitat</a>
+        <a href="https://www.castelldefels.org/ca/accessibilitat-web" target="_blank" id="fl-acc">Accessibilitat</a>
+        <a href="https://www.castelldefels.org/ca/contact-info" target="_blank" id="fl-cont">Contacte</a>
+    </div>
+</div>
+
+<!-- ══ MODAL ══ -->
+<div class="modal-overlay-b" id="modalB">
+    <div class="modal-b">
+        <button class="modal-b-close" id="closeBModal">✕</button>
+        <div class="modal-b-header">
+            <div class="section-tag" style="margin-bottom:0.75rem">
+                <div class="section-tag-dot"></div>
+                <span class="section-tag-text" data-i18n="modal_eyebrow">Sol·licitud Oficial</span>
+            </div>
+            <h3 style="font-family:'Fraunces',serif;font-size:1.8rem;font-weight:400;color:var(--text)" data-i18n="modal_title">Adhesió al Programa</h3>
+            <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.4rem;font-weight:600" data-i18n="modal_sub">Registre oficial PetPioneer 2026. Temps estimat: 3 minuts.</p>
+        </div>
+        <div class="modal-b-body">
+            <form id="regFormB" novalidate>
+                <div class="form-b-grid">
+                    <div class="field-b-wrap full"><label class="field-b-label" data-i18n="f_nombre">Nom Fiscal *</label><input class="field-b-input" type="text" id="bf-nombre" placeholder="Restaurant La Barca S.L."><span class="field-b-error" id="be-nombre">Camp obligatori</span></div>
+                    <div class="field-b-wrap"><label class="field-b-label" data-i18n="f_cif">CIF / NIF *</label><input class="field-b-input" type="text" id="bf-cif" placeholder="B12345678"><span class="field-b-error" id="be-cif">Mínim 8 caràcters</span></div>
+                    <div class="field-b-wrap"><label class="field-b-label" data-i18n="f_cat_label">Categoria *</label>
+                        <select class="field-b-select" id="bf-cat">
+                            <option value="">Seleccionar...</option>
+                            <option>Hostelería</option><option>Alojamiento</option><option>Comercios</option>
+                        </select><span class="field-b-error" id="be-cat">Selecciona una categoria</span>
+                    </div>
+                    <div class="field-b-wrap"><label class="field-b-label" data-i18n="f_contacto">Persona de Contacte *</label><input class="field-b-input" type="text" id="bf-contacto" placeholder="Nom complet"><span class="field-b-error" id="be-contacto">Camp obligatori</span></div>
+                    <div class="field-b-wrap"><label class="field-b-label" data-i18n="f_tel">Telèfon *</label><input class="field-b-input" type="tel" id="bf-tel" placeholder="+34 600 000 000"><span class="field-b-error" id="be-tel">Mínim 9 dígits</span></div>
+                    <div class="field-b-wrap full"><label class="field-b-label" data-i18n="f_email">Correu Electrònic *</label><input class="field-b-input" type="email" id="bf-email" placeholder="contacte@establiment.com"><span class="field-b-error" id="be-email">Email no vàlid</span></div>
+                    <div class="field-b-wrap full"><label class="field-b-label" data-i18n="f_servicios">Serveis PetFriendly</label><textarea class="field-b-textarea" id="bf-servicios" placeholder="Aigua, zona d'ombra, menú especial..."></textarea></div>
+                </div>
+                <button type="submit" class="submit-b" id="submitBtnB"><span id="submitLabelB" data-i18n="f_submit">Enviar Sol·licitud Oficial</span></button>
+                <p style="font-size:0.65rem;color:var(--text-muted);text-align:center;margin-top:0.8rem;font-weight:600" data-i18n="f_privacy">En enviar acceptes la política de privacitat de l'Ajuntament. Resposta en 48-72h hàbils.</p>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── I18N (same translations object, reused) ──
+const i18nB = {
+    ca:{
+        hero_badge:'Sistema actiu · Administració Local 2026',
+        hero_title:'La teva ciutat,',
+        hero_words:['la teva llar.','el teu parc.','la teva aventura.','el teu paradís.','el teu món.'],
+        hero_desc:'La plataforma oficial per descobrir i certificar serveis PetFriendly al municipi.',
+        hero_cta1:'🗺️ Veure Mapa Interactiu', hero_cta2:'Per què PetPioneer',
+        nav_join:'Unir-se a la Xarxa', nav_dark:'Mode fosc', nav_light:'Mode clar', nav_sub:'Directori Municipal',
+        stat_locals:'Locals Certificats', stat_barrios:'Barris Adherits', stat_rating:'Valoració Mitjana', stat_requests:'Sol·licituds Aquest Mes',
+        instit_eyebrow:'Per què PetPioneer', instit_title:'Una ciutat que cuida', instit_em:'els seus.',
+        instit_intro:'El 42% de les llars de Castelldefels conviu amb una mascota. L\'Ajuntament ja ha apostat per construir nous parcs canins a la platja i al centre de la ciutat. PetPioneer és el pas natural: un directori oficial que certifica els establiments PetFriendly i posiciona Castelldefels com a referent a Catalunya.',
+        p1t:'Benestar Animal', p1d:'Estàndards d\'acollida i benestar per als animals de companyia.',
+        p2t:'Dinamització Econòmica', p2d:'Els locals certificats augmenten el seu tiquet mitjà un 23%.',
+        p3t:'Turisme de Qualitat', p3d:'Castelldefels, destinació PetFriendly de referència nacional.',
+        p4t:'Imatge Institucional', p4d:'Valors moderns i inclusius compromesos amb la comunitat.',
+        instit_cta1:'Veure procés d\'adhesió →', instit_cta2:'Sol·licitar informació',
+        instit_quote:'"La certificació PetPioneer ha triplicat les visites de famílies amb mascotes a la nostra terrassa."',
+        instit_quote_short:'Castelldefels\nPetFriendly',
+        map_eyebrow:'Directori Geolocalitzat', map_title:'Mapa', map_em:'Viu',
+        map_sub:'Tots els locals certificats en temps real', map_search:'🔍 Cercar local...',
+        map_cat:'Categoria', map_all:'Tots', map_host:'🍽️ Hostaleria', map_aloj:'🏨 Allotjament', map_com:'🛍️ Comerços',
+        map_barrio:'Barri', map_allbar:'Tots els barris',
+        news_eyebrow:'Comunicacions Municipals', news_title:'Actualitat', news_em:'Institucional',
+        n1_tag:'Destacat', n1_date:'12 Maig, 2026', n1_title:'L\'Ajuntament llança la convocatòria oficial d\'adhesió PetPioneer 2026', n1_desc:'El programa municipal de certificació PetFriendly obre la seva primera convocatòria.',
+        n2_date:'8 Maig, 2026', n2_title:'Nova normativa d\'accés per a mascotes en espais públics', n2_desc:'El ple aprova l\'actualització del reglament municipal per facilitar l\'accés en zones verdes.',
+        n3_date:'3 Maig, 2026', n3_title:'Primers 47 locals reben el distintiu PetPioneer', n3_desc:'La primera fase conclou amb èxit: 47 establiments ja llueixen el segell oficial.',
+        n4_date:'28 Abril, 2026', n4_title:'Taller gratuït: Com atendre millor els clients amb mascotes', n4_desc:'L\'Ajuntament organitza una jornada formativa per a propietaris interessats.',
+        cert_eyebrow:'Procés d\'Adhesió', cert_title:'Com', cert_em:'certificar-se',
+        cs1t:'Sol·licitud Oficial', cs1d:'Omple el formulari amb les dades fiscals i els serveis PetFriendly.',
+        cs2t:'Revisió Municipal', cs2d:'Un tècnic valida la informació i realitza una visita d\'inspecció sense cost.',
+        cs3t:'Obtenció del Segell', cs3d:'Reps el distintiu físic i el teu establiment apareix al directori oficial.',
+        cs4t:'Renovació Anual', cs4d:'La certificació es renova cada any per garantir la qualitat del directori.',
+        cert_cta:'Sol·licitar Adhesió Ara 🐾', cert_badge:'Certificat Oficial',
+        modal_eyebrow:'Sol·licitud Oficial', modal_title:'Adhesió al Programa', modal_sub:'Registre oficial PetPioneer 2026. Temps estimat: 3 minuts.',
+        f_nombre:'Nom Fiscal *', f_cif:'CIF / NIF *', f_cat_label:'Categoria *', f_contacto:'Persona de Contacte *',
+        f_tel:'Telèfon *', f_email:'Correu Electrònic *', f_servicios:'Serveis PetFriendly',
+        f_submit:'Enviar Sol·licitud Oficial', f_sending:'Enviant...', f_sent:'✓ Sol·licitud Rebuda',
+        f_privacy:'En enviar acceptes la política de privacitat de l\'Ajuntament. Resposta en 48-72h hàbils.',
+        footer_copy:'© 2026 Ajuntament de Castelldefels · PetPioneer. Tots els drets reservats.',
+        fl_legal:'Avís Legal', fl_priv:'Privacitat', fl_acc:'Accessibilitat', fl_cont:'Contacte',
+        cta_llegar:'Com arribar →',
+    },
+    es:{
+        hero_badge:'Sistema activo · Administración Local 2026',
+        hero_title:'Tu ciudad,',
+        hero_words:['su hogar.','su parque.','su aventura.','su paraíso.','su mundo.'],
+        hero_desc:'La plataforma oficial para descubrir y certificar servicios PetFriendly en el municipio.',
+        hero_cta1:'🗺️ Ver Mapa Interactivo', hero_cta2:'Por qué PetPioneer',
+        nav_join:'Unirse a la Red', nav_dark:'Modo oscuro', nav_light:'Modo claro', nav_sub:'Directorio Municipal',
+        stat_locals:'Locales Certificados', stat_barrios:'Barrios Adheridos', stat_rating:'Valoración Media', stat_requests:'Solicitudes Este Mes',
+        instit_eyebrow:'Por qué PetPioneer', instit_title:'Una ciudad que cuida', instit_em:'a los suyos.',
+        instit_intro:'El 42% de los hogares de Castelldefels convive con una mascota. El Ayuntamiento ya ha apostado por construir nuevos parques caninos en la playa y en el centro. PetPioneer es el paso natural.',
+        p1t:'Bienestar Animal', p1d:'Estándares de acogida y bienestar para los animales de compañía.',
+        p2t:'Dinamización Económica', p2d:'Los locales certificados aumentan su ticket medio un 23%.',
+        p3t:'Turismo de Calidad', p3d:'Castelldefels, destino PetFriendly de referencia nacional.',
+        p4t:'Imagen Institucional', p4d:'Valores modernos e inclusivos comprometidos con la comunidad.',
+        instit_cta1:'Ver proceso de adhesión →', instit_cta2:'Solicitar información',
+        instit_quote:'"La certificación PetPioneer ha triplicado las visitas de familias con mascotas a nuestra terraza."',
+        instit_quote_short:'Castelldefels\nPetFriendly',
+        map_eyebrow:'Directorio Geolocalizado', map_title:'Mapa', map_em:'Vivo',
+        map_sub:'Todos los locales certificados en tiempo real', map_search:'🔍 Buscar local...',
+        map_cat:'Categoría', map_all:'Todos', map_host:'🍽️ Hostelería', map_aloj:'🏨 Alojamiento', map_com:'🛍️ Comercios',
+        map_barrio:'Barrio', map_allbar:'Todos los barrios',
+        news_eyebrow:'Comunicaciones Municipales', news_title:'Actualidad', news_em:'Institucional',
+        n1_tag:'Destacado', n1_date:'12 Mayo, 2026', n1_title:'El Ayuntamiento lanza la convocatoria oficial de adhesión PetPioneer 2026', n1_desc:'El programa municipal de certificación PetFriendly abre su primera convocatoria.',
+        n2_date:'8 Mayo, 2026', n2_title:'Nueva normativa de acceso para mascotas en espacios públicos', n2_desc:'El pleno aprueba la actualización del reglamento municipal.',
+        n3_date:'3 Mayo, 2026', n3_title:'Primeros 47 locales reciben el distintivo PetPioneer', n3_desc:'La primera fase concluye con éxito: 47 establecimientos ya lucen el sello oficial.',
+        n4_date:'28 Abril, 2026', n4_title:'Taller gratuito: Cómo atender mejor a clientes con mascotas', n4_desc:'El Ayuntamiento organiza una jornada formativa para propietarios interesados.',
+        cert_eyebrow:'Proceso de Adhesión', cert_title:'Cómo', cert_em:'certificarse',
+        cs1t:'Solicitud Oficial', cs1d:'Rellena el formulario con los datos fiscales y los servicios PetFriendly.',
+        cs2t:'Revisión Municipal', cs2d:'Un técnico valida la información y realiza una visita de inspección sin coste.',
+        cs3t:'Obtención del Sello', cs3d:'Recibes el distintivo físico y tu establecimiento aparece en el directorio.',
+        cs4t:'Renovación Anual', cs4d:'La certificación se renueva cada año para garantizar la calidad.',
+        cert_cta:'Solicitar Adhesión Ahora 🐾', cert_badge:'Certificado Oficial',
+        modal_eyebrow:'Solicitud Oficial', modal_title:'Adhesión al Programa', modal_sub:'Registro oficial PetPioneer 2026. Tiempo estimado: 3 minutos.',
+        f_nombre:'Nombre Fiscal *', f_cif:'CIF / NIF *', f_cat_label:'Categoría *', f_contacto:'Persona de Contacto *',
+        f_tel:'Teléfono *', f_email:'Correo Electrónico *', f_servicios:'Servicios PetFriendly',
+        f_submit:'Enviar Solicitud Oficial', f_sending:'Enviando...', f_sent:'✓ Solicitud Recibida',
+        f_privacy:'Al enviar aceptas la política de privacidad del Ayuntamiento. Respuesta en 48-72h hábiles.',
+        footer_copy:'© 2026 Ajuntament de Castelldefels · PetPioneer. Todos los derechos reservados.',
+        fl_legal:'Aviso Legal', fl_priv:'Privacidad', fl_acc:'Accesibilidad', fl_cont:'Contacto',
+        cta_llegar:'Cómo llegar →',
+    },
+    en:{
+        hero_badge:'System active · Local Administration 2026',
+        hero_title:'Your city,',
+        hero_words:['your home.','your park.','your adventure.','your paradise.','your world.'],
+        hero_desc:'The official platform to discover and certify PetFriendly services in the municipality.',
+        hero_cta1:'🗺️ View Interactive Map', hero_cta2:'Why PetPioneer',
+        nav_join:'Join the Network', nav_dark:'Dark mode', nav_light:'Light mode', nav_sub:'Municipal Directory',
+        stat_locals:'Certified Venues', stat_barrios:'Districts Joined', stat_rating:'Average Rating', stat_requests:'Requests This Month',
+        instit_eyebrow:'Why PetPioneer', instit_title:'A city that cares', instit_em:'for its own.',
+        instit_intro:'42% of Castelldefels households live with a pet. The City Council has already committed to building new dog parks on the beach and in the city centre. PetPioneer is the natural next step.',
+        p1t:'Animal Welfare', p1d:'Welcome and welfare standards for companion animals.',
+        p2t:'Economic Boost', p2d:'Certified venues increase their average ticket by 23%.',
+        p3t:'Quality Tourism', p3d:'Castelldefels, a leading national PetFriendly destination.',
+        p4t:'Institutional Image', p4d:'Modern, inclusive values committed to the community.',
+        instit_cta1:'See accreditation process →', instit_cta2:'Request information',
+        instit_quote:'"PetPioneer certification has tripled visits from families with pets to our terrace."',
+        instit_quote_short:'Castelldefels\nPetFriendly',
+        map_eyebrow:'Geolocated Directory', map_title:'Live', map_em:'Map',
+        map_sub:'All certified venues in real time', map_search:'🔍 Search venue...',
+        map_cat:'Category', map_all:'All', map_host:'🍽️ Restaurants', map_aloj:'🏨 Accommodation', map_com:'🛍️ Shops',
+        map_barrio:'District', map_allbar:'All districts',
+        news_eyebrow:'Municipal Communications', news_title:'Institutional', news_em:'News',
+        n1_tag:'Featured', n1_date:'May 12, 2026', n1_title:'City Council launches official PetPioneer 2026 accreditation call', n1_desc:'The municipal PetFriendly certification programme opens its first call.',
+        n2_date:'May 8, 2026', n2_title:'New pet access regulations for public spaces', n2_desc:'The plenary approves the update to municipal regulations.',
+        n3_date:'May 3, 2026', n3_title:'First 47 venues receive the PetPioneer badge', n3_desc:'The first phase concludes successfully: 47 establishments display the official seal.',
+        n4_date:'April 28, 2026', n4_title:'Free workshop: How to better serve customers with pets', n4_desc:'The City Council organises a training day for business owners.',
+        cert_eyebrow:'Accreditation Process', cert_title:'How to', cert_em:'get certified',
+        cs1t:'Official Application', cs1d:'Fill in the form with your fiscal details and PetFriendly services.',
+        cs2t:'Municipal Review', cs2d:'A technician validates the information and carries out a free inspection.',
+        cs3t:'Obtaining the Seal', cs3d:'You receive the badge and your venue appears in the official directory.',
+        cs4t:'Annual Renewal', cs4d:'Certification is renewed each year to guarantee quality.',
+        cert_cta:'Apply for Accreditation Now 🐾', cert_badge:'Official Certificate',
+        modal_eyebrow:'Official Application', modal_title:'Programme Accreditation', modal_sub:'Official PetPioneer 2026 registration. Estimated time: 3 minutes.',
+        f_nombre:'Business Name *', f_cif:'Tax ID *', f_cat_label:'Category *', f_contacto:'Contact Person *',
+        f_tel:'Phone *', f_email:'Email Address *', f_servicios:'PetFriendly Services',
+        f_submit:'Submit Official Application', f_sending:'Sending...', f_sent:'✓ Application Received',
+        f_privacy:'By submitting you accept the City Council privacy policy. Response within 48-72 working hours.',
+        footer_copy:'© 2026 Ajuntament de Castelldefels · PetPioneer. All rights reserved.',
+        fl_legal:'Legal Notice', fl_priv:'Privacy', fl_acc:'Accessibility', fl_cont:'Contact',
+        cta_llegar:'Get directions →',
+    }
+};
+
+let currentLangB = 'ca';
+
+function setLangB(lang) {
+    currentLangB = lang;
+    const t = i18nB[lang];
+    document.documentElement.setAttribute('lang', lang);
+
+    // Flag buttons
+    ['es','ca','en'].forEach(l => {
+        const btn = document.getElementById('lb-'+l);
+        if (btn) btn.classList.toggle('active', l === lang);
+        if (btn) btn.style.opacity = l === lang ? '1' : '0.5';
+    });
+
+    // data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const k = el.getAttribute('data-i18n').replace(/-/g,'_');
+        if (t[k] !== undefined) el.textContent = t[k];
+    });
+
+    // Toggle label
+    const tl = document.querySelector('.toggle-label-b');
+    if (tl) tl.textContent = isDarkB ? t.nav_light : t.nav_dark;
+
+    // Word cycling
+    wordsB.length = 0;
+    t.hero_words.forEach(w => wordsB.push(w));
+    if (wordElB) wordElB.textContent = wordsB[0];
+
+    // Placeholders
+    const si = document.getElementById('searchInputB');
+    if (si) si.placeholder = t.map_search;
+
+    // Barrio select
+    const bs = document.getElementById('barrioSelectB');
+    if (bs) bs.options[0].text = t.map_allbar;
+
+    // Stats
+    setTB({'sl-locals':t.stat_locals,'sl-barrios':t.stat_barrios,'sl-rating':t.stat_rating,'sl-requests':t.stat_requests,
+           'sl-locals2':t.stat_locals,'sl-barrios2':t.stat_barrios,'sl-rating2':t.stat_rating,
+           'n1-tag':t.n1_tag,'n1-date':t.n1_date,'n1-title':t.n1_title,'n1-desc':t.n1_desc,
+           'n2-date':t.n2_date,'n2-title':t.n2_title,'n2-desc':t.n2_desc,
+           'n3-date':t.n3_date,'n3-title':t.n3_title,'n3-desc':t.n3_desc,
+           'n4-date':t.n4_date,'n4-title':t.n4_title,'n4-desc':t.n4_desc,
+           'cs1t':t.cs1t,'cs1d':t.cs1d,'cs2t':t.cs2t,'cs2d':t.cs2d,
+           'cs3t':t.cs3t,'cs3d':t.cs3d,'cs4t':t.cs4t,'cs4d':t.cs4d,
+           'p1t':t.p1t,'p1d':t.p1d,'p2t':t.p2t,'p2d':t.p2d,
+           'p3t':t.p3t,'p3d':t.p3d,'p4t':t.p4t,'p4d':t.p4d,
+           'footer-copy':t.footer_copy,'fl-legal':t.fl_legal,'fl-priv':t.fl_priv,
+           'fl-acc':t.fl_acc,'fl-cont':t.fl_cont
+    });
+    const sl = document.getElementById('submitLabelB');
+    if (sl) sl.textContent = t.f_submit;
+}
+function setTB(map){ Object.entries(map).forEach(([id,val])=>{ const el=document.getElementById(id); if(el&&val)el.textContent=val; }); }
+
+// ── THEME VAR ──
+let isDarkB = false;
+
+// ── WORD CYCLING ──
+const wordsB = ['la teva llar.','el teu parc.','la teva aventura.','el teu paradís.','el teu món.'];
+let wordIdxB = 0;
+const wordElB = document.getElementById('heroWord');
+if (wordElB) wordElB.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+setInterval(() => {
+    if (!wordElB) return;
+    wordElB.style.opacity = '0';
+    wordElB.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        wordIdxB = (wordIdxB + 1) % wordsB.length;
+        wordElB.textContent = wordsB[wordIdxB];
+        wordElB.style.opacity = '1';
+        wordElB.style.transform = 'translateY(0)';
+    }, 300);
+}, 2800);
+
+// ── GSAP ──
+gsap.registerPlugin(ScrollTrigger);
+const tlB = gsap.timeline({delay:0.2});
+tlB.from('#heroBadge',{y:20,opacity:0,duration:.8,ease:'power3.out'})
+   .from('#heroTitle',{y:50,opacity:0,duration:1,ease:'power3.out'},'-=.4')
+   .from('.hero-desc-b',{y:25,opacity:0,duration:.8,ease:'power3.out'},'-=.5')
+   .from('#heroCta',{y:20,opacity:0,duration:.6,ease:'power3.out'},'-=.4');
+
+gsap.utils.toArray('.reveal-b').forEach(el => {
+    gsap.to(el, {
+        scrollTrigger:{trigger:el,start:'top 87%',toggleActions:'play none none none'},
+        y:0, opacity:1, duration:.8, ease:'power3.out'
+    });
+});
+
+// Stat pills entrance
+setTimeout(() => {
+    ['sp1','sp2','sp3'].forEach((id,i) => {
+        setTimeout(() => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('visible');
+        }, i * 150);
+    });
+}, 1000);
+
+// Counter
+function counterB(id, target) {
+    const el = document.getElementById(id); if (!el) return;
+    const s = performance.now();
+    (function u(now){
+        const p = Math.min((now-s)/1500,1), e = 1-Math.pow(1-p,3);
+        el.textContent = ~~(e*target); if(p<1) requestAnimationFrame(u);
+    })(performance.now());
+}
+ScrollTrigger.create({trigger:'.stats-b',start:'top 80%',once:true,
+    onEnter:()=>{ counterB('statLocales',247); counterB('statBarrios',18); counterB('statLocales2',247); counterB('statBarrios2',18); counterB('statSolicitudes',34); }
+});
+
+// ── MAP ──
+const catMetaB = {
+    'Hostelería': {color:'#FF6B35',emoji:'🍽️'},
+    'Alojamiento':{color:'#0096C7',emoji:'🏨'},
+    'Comercios':  {color:'#7B2FBE',emoji:'🛍️'},
+};
+const localesB = [
+    {id:1, name:"Restaurant La Barca",        cat:"Hostelería", barrio:"Platja",      coords:[41.2760,1.9760], emoji:'🐟',tags:["Terrassa pet","Bols d'aigua","Menú especial"],   photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1537151608828-ea2b11777ee8?w=400&q=80"]},
+    {id:2, name:"Hotel Neptune Castelldefels", cat:"Alojamiento", barrio:"Platja",      coords:[41.2748,1.9798], emoji:'🏨',tags:["Habitacions pet","Servei 24h","Sense recàrrec"], photos:["https://images.unsplash.com/photo-1544568100-847a948585b9?w=400&q=80","https://images.unsplash.com/photo-1566073771259-6a8506099945?w=400&q=80"]},
+    {id:3, name:"Clínica Veterinària Garraf",  cat:"Comercios",   barrio:"Centre",      coords:[41.2791,1.9832], emoji:'🩺',tags:["Urgències 24h","Vacunació","Cirurgia"],           photos:["https://images.unsplash.com/photo-1559153466-bf0db82d5b94?w=400&q=80","https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80"]},
+    {id:4, name:"Bar El Chiringuito",          cat:"Hostelería", barrio:"Platja",      coords:[41.2731,1.9744], emoji:'🍺',tags:["Terrassa platja","Pet welcome","Fresc tot l'any"],photos:["https://images.unsplash.com/photo-1555658636-6e4a36218be7?w=400&q=80","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80"]},
+    {id:5, name:"Apartaments Mar i Sol",       cat:"Alojamiento", barrio:"Platja",      coords:[41.2755,1.9810], emoji:'🌊',tags:["Vistes al mar","Terrassa privada","Gossos benvinguts"],photos:["https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80","https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80"]},
+    {id:6, name:"Pet Shop Castelldefels",      cat:"Comercios",   barrio:"Centre",      coords:[41.2805,1.9855], emoji:'🐾',tags:["Alimentació","Accessoris","Assessoria"],          photos:["https://images.unsplash.com/photo-1598875184994-c58b3c9b9694?w=400&q=80","https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=400&q=80"]},
+    {id:7, name:"Cafè del Passeig",            cat:"Hostelería", barrio:"Centre",      coords:[41.2818,1.9841], emoji:'☕',tags:["Esmorzars","Gats i gossos OK","Zona ombra"],      photos:["https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&q=80","https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&q=80"]},
+    {id:8, name:"Peluqueria Canina Woof",      cat:"Comercios",   barrio:"Centre",      coords:[41.2798,1.9868], emoji:'✂️',tags:["Bany aromàtic","Perruqueria","Cita prèvia"],     photos:["https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&q=80","https://images.unsplash.com/photo-1601758003122-53c40e686a19?w=400&q=80"]},
+    {id:9, name:"Hotel dels Pins",             cat:"Alojamiento", barrio:"Castelldefels",coords:[41.2832,1.9778],emoji:'🌲',tags:["Jardí privat","Zona verda","Totes les races"],   photos:["https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400&q=80","https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80"]},
+    {id:10,name:"Pizzeria Can Fang",           cat:"Hostelería", barrio:"Castelldefels",coords:[41.2842,1.9795], emoji:'🍕',tags:["Terrassa coberta","Pet menu","Sense límit"],     photos:["https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=400&q=80","https://images.unsplash.com/photo-1559339352-11d035aa65de?w=400&q=80"]},
+    {id:11,name:"Càmping La Tortuga Ligera",   cat:"Alojamiento", barrio:"Gavà Mar",    coords:[41.2698,1.9712], emoji:'⛺',tags:["Parcel·les pet","Platja propera","Zona gossos"],  photos:["https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400&q=80","https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=400&q=80"]},
+    {id:12,name:"Restaurant El Faro",          cat:"Hostelería", barrio:"Platja",      coords:[41.2720,1.9730], emoji:'🏮',tags:["Vistes al mar","Cuina mediterrània","Gos benvingut"],photos:["https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80","https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400&q=80"]},
+    {id:13,name:"Farmàcia Veterinària Garraf", cat:"Comercios",   barrio:"Centre",      coords:[41.2811,1.9848], emoji:'💊',tags:["Medicaments","Nutrició clínica","Urgències"],     photos:["https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?w=400&q=80","https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80"]},
+    {id:14,name:"Surf & Dogs Beach Bar",       cat:"Hostelería", barrio:"Platja",      coords:[41.2738,1.9768], emoji:'🏄',tags:["Beach bar","Dog friendly","Lloguer taules"],     photos:["https://images.unsplash.com/photo-1527661591475-527312dd65f5?w=400&q=80","https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80"]},
+    {id:15,name:"Hostal Mediterrani",          cat:"Alojamiento", barrio:"Centre",      coords:[41.2822,1.9862], emoji:'🌅',tags:["Preu econòmic","2 mascotes OK","Aparcament"],    photos:["https://images.unsplash.com/photo-1578683010236-d716f9a3f461?w=400&q=80","https://images.unsplash.com/photo-1591768575198-88dac53fbd0a?w=400&q=80"]},
+    {id:16,name:"Granja Biològica Can Romeu",  cat:"Comercios",   barrio:"Castelldefels",coords:[41.2855,1.9812],emoji:'🌿',tags:["Menjar ecològic pet","Verdures fresques","Local"],photos:["https://images.unsplash.com/photo-1530281700549-e82e7bf110d6?w=400&q=80","https://images.unsplash.com/photo-1488459716781-31db52582fe9?w=400&q=80"]},
+    {id:17,name:"Bar Restaurante Los Pinos",   cat:"Hostelería", barrio:"Castelldefels",coords:[41.2848,1.9823], emoji:'🌴',tags:["Jardí gran","Menú diari","Gossos lliures"],       photos:["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&q=80","https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80"]},
+    {id:18,name:"Centro Canino Garraf",        cat:"Comercios",   barrio:"Gavà Mar",    coords:[41.2705,1.9722], emoji:'🐕',tags:["Adiestrament","Guarderia","Socialització"],       photos:["https://images.unsplash.com/photo-1548199973-03cce0bbc87b?w=400&q=80","https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=400&q=80"]},
+];
+
+const mapB = L.map('map-b-canvas',{zoomControl:true,attributionControl:false,markerZoomAnimation:false}).setView([41.2780,1.9800],14);
+let mapTileB = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'&copy; CartoDB'}).addTo(mapB);
+document.getElementById('map-b-canvas').style.filter = 'saturate(1.15) brightness(1.02)';
+
+let activeMarkersB=[], activeCatB='all', activeSearchB='', highlightedIdB=null;
+
+function getFilteredB(){
+    const barrio=document.getElementById('barrioSelectB')?.value||'all';
+    return localesB.filter(l=>
+        (activeCatB==='all'||l.cat===activeCatB)&&
+        (barrio==='all'||l.barrio===barrio)&&
+        (activeSearchB===''||l.name.toLowerCase().includes(activeSearchB.toLowerCase()))
+    );
+}
+function renderSidebarB(filtered){
+    const cnt=document.getElementById('localeCountB');
+    if(cnt) cnt.textContent=`${filtered.length} local${filtered.length!==1?'s':''} trobat${filtered.length!==1?'s':''}`;
+    document.getElementById('localeListB').innerHTML = filtered.length
+        ? filtered.map(l=>{const m=catMetaB[l.cat];return`
+            <div class="locale-card-b ${l.id===highlightedIdB?'highlighted':''}" onclick="focusLocaleB(${l.id})">
+                <div style="display:flex;align-items:center;gap:8px">
+                    <span style="font-size:14px">${l.emoji||m.emoji}</span>
+                    <div class="locale-card-b-name">${l.name}</div>
+                </div>
+                <div class="locale-card-b-meta">
+                    <span class="locale-card-b-dot" style="background:${m.color}"></span>
+                    <span>${l.cat}</span><span>·</span><span>${l.barrio}</span>
+                </div>
+            </div>`;}).join('')
+        :`<div style="padding:2rem;text-align:center;font-size:.8rem;color:var(--text-muted);font-weight:600">Sense resultats</div>`;
+}
+function renderMarkersB(){
+    activeMarkersB.forEach(m=>mapB.removeLayer(m));
+    activeMarkersB=[];
+    const filtered=getFilteredB();
+    renderSidebarB(filtered);
+    filtered.forEach(l=>{
+        const m=catMetaB[l.cat]; const em=l.emoji||m.emoji;
+        const isMobile=window.innerWidth<900;
+        const sz=isMobile?26:34;
+        const fs=isMobile?'12px':'16px';
+        const pin=`<div style="display:flex;flex-direction:column;align-items:center;cursor:pointer;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.3));transition:transform .15s" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"><div style="width:${sz}px;height:${sz}px;background:${m.color};border-radius:50% 50% 50% 4px;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;border:3px solid white;"><span style="transform:rotate(45deg);font-size:${fs};line-height:1">${em}</span></div></div>`;
+        const icon=L.divIcon({className:'',html:pin,iconSize:[sz,sz+6],iconAnchor:[sz/2,sz+6],popupAnchor:[0,-(sz+8)]});
+        const marker=L.marker(l.coords,{icon}).addTo(mapB);
+        const url=`https://www.google.com/maps/dir/?api=1&destination=${l.coords[0]},${l.coords[1]}`;
+        const t = i18nB[currentLangB];
+        marker.on('click',e=>{highlightedIdB=l.id;renderSidebarB(getFilteredB());showPopupB(l,m,url,t,e.originalEvent);});
+        activeMarkersB.push(marker);
+    });
+}
+
+const customPopupB = document.getElementById('customPopupB');
+function showPopupB(l,m,url,t,ev){
+    customPopupB.innerHTML=`
+        <button onclick="closePopupB()" style="position:absolute;top:8px;right:10px;z-index:10;background:rgba(0,0,0,.3);color:white;border:none;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;font-weight:700">✕</button>
+        <div class="popup-b-img">
+            <div class="popup-b-cat" style="background:${m.color}">${l.emoji||m.emoji} ${l.cat}</div>
+            <button class="carr-b" style="left:8px" onclick="slideB(${l.id},-1,${l.photos.length})">‹</button>
+            <button class="carr-b" style="right:8px" onclick="slideB(${l.id},1,${l.photos.length})">›</button>
+            <div class="carousel-track" id="trackb-${l.id}" data-idx="0">${l.photos.map(p=>`<img src="${p}" alt="${l.name}" loading="lazy">`).join('')}</div>
+        </div>
+        <div class="popup-b-body">
+            <div class="popup-b-name">${l.name}</div>
+            <div class="popup-b-loc">${l.barrio} · ${l.cat}</div>
+            <div class="popup-b-tags">${l.tags.map(tag=>`<span class="popup-b-tag">${tag}</span>`).join('')}</div>
+            <a href="${url}" target="_blank" class="popup-b-cta" style="background:${m.color}">${t.cta_llegar}</a>
+        </div>`;
+    const px=ev.clientX, py=ev.clientY;
+    const left=Math.min(px+15,window.innerWidth-295);
+    const top=Math.min(py-60,window.innerHeight-400);
+    customPopupB.style.left=Math.max(10,left)+'px';
+    customPopupB.style.top=Math.max(10,top)+'px';
+    customPopupB.style.display='block';
+}
+window.closePopupB=()=>{ customPopupB.style.display='none'; };
+window.slideB=function(id,step,total){
+    const t=document.getElementById('trackb-'+id);
+    const i=(parseInt(t.getAttribute('data-idx'))+step+total)%total;
+    t.setAttribute('data-idx',i);t.style.transform=`translateX(-${i*100}%)`;
+};
+window.focusLocaleB=function(id){
+    const l=localesB.find(x=>x.id===id);if(!l)return;
+    highlightedIdB=id;mapB.setView(l.coords,16,{animate:true});renderSidebarB(getFilteredB());
+    const fi=getFilteredB(),idx=fi.findIndex(x=>x.id===id);
+    if(idx>=0&&activeMarkersB[idx])setTimeout(()=>activeMarkersB[idx].fire('click'),500);
+};
+function filterCatB(cat,btn){
+    document.querySelectorAll('.filter-b-chip').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); activeCatB=cat; renderMarkersB();
+}
+function mobileFilterB(cat,btn){
+    document.querySelectorAll('.mobile-chip-b').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active'); activeCatB=cat; renderMarkersB();
+}
+function handleSearchB(){ activeSearchB=document.getElementById('searchInputB').value; renderMarkersB(); }
+document.addEventListener('click',e=>{ if(customPopupB.style.display==='block'&&!customPopupB.contains(e.target)&&!e.target.closest('.leaflet-marker-icon'))closePopupB(); });
+window.addEventListener('scroll',()=>closePopupB(),{passive:true});
+mapB.on('movestart zoomstart',()=>closePopupB());
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopupB();});
+renderMarkersB();
+
+// ── MODAL ──
+const modalB=document.getElementById('modalB');
+const openMB=()=>modalB.classList.add('open');
+const closeMB=()=>modalB.classList.remove('open');
+['openModal','openModal2','openModal3'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.addEventListener('click',openMB);
+});
+document.getElementById('closeBModal').addEventListener('click',closeMB);
+modalB.addEventListener('click',e=>{if(e.target===modalB)closeMB();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMB();});
+
+// ── FORM ──
+function seB(id,msg){const e=document.getElementById('bf-'+id),r=document.getElementById('be-'+id);if(e)e.classList.add('error');if(r&&msg)r.textContent=msg;if(r)r.classList.add('show');}
+function ceB(id){const e=document.getElementById('bf-'+id),r=document.getElementById('be-'+id);if(e)e.classList.remove('error');if(r)r.classList.remove('show');}
+['nombre','cif','cat','contacto','tel','email'].forEach(id=>{
+    const el=document.getElementById('bf-'+id);if(el)el.addEventListener('input',()=>ceB(id));
+});
+document.getElementById('regFormB').addEventListener('submit',function(e){
+    e.preventDefault(); let ok=true;
+    const v=id=>document.getElementById('bf-'+id).value.trim();
+    if(!v('nombre')){seB('nombre');ok=false;}
+    if(v('cif').length<8){seB('cif');ok=false;}
+    if(!v('cat')){seB('cat');ok=false;}
+    if(!v('contacto')){seB('contacto');ok=false;}
+    if(v('tel').replace(/\D/g,'').length<9){seB('tel');ok=false;}
+    if(!v('email').includes('@')){seB('email');ok=false;}
+    if(!ok)return;
+    const btn=document.getElementById('submitBtnB'),lbl=document.getElementById('submitLabelB');
+    btn.disabled=true; lbl.textContent='Enviant...';
+    setTimeout(()=>{
+        btn.style.background='#06D6A0'; lbl.textContent='✓ Sol·licitud Rebuda';
+        setTimeout(()=>{closeMB();btn.disabled=false;btn.style.background='';lbl.textContent=i18nB[currentLangB].f_submit;this.reset();},2200);
+    },1600);
+});
+
+// Fix dark mode — apply CSS variables properly
+document.getElementById('themeToggle').addEventListener('click', () => {
+    isDarkB = !isDarkB;
+    document.getElementById('toggleIcon').textContent = isDarkB ? '☀️' : '🌙';
+    const tl = document.querySelector('.toggle-label-b');
+    if (tl) tl.textContent = isDarkB ? i18nB[currentLangB].nav_light : i18nB[currentLangB].nav_dark;
+
+    if (isDarkB) {
+        document.documentElement.style.setProperty('--sand','#1a1a2e');
+        document.documentElement.style.setProperty('--sand-dark','#16213e');
+        document.documentElement.style.setProperty('--white','#0d0d14');
+        document.documentElement.style.setProperty('--text','#f0ece4');
+        document.documentElement.style.setProperty('--text-mid','#c8d0e8');
+        document.documentElement.style.setProperty('--text-muted','#6a7090');
+        document.documentElement.style.setProperty('--dark','#050510');
+        document.documentElement.style.setProperty('--ocean-deep','#010d1f');
+        document.documentElement.style.setProperty('--ocean','#013a5c');
+        document.documentElement.style.setProperty('--ocean-light','#025a8a');
+        document.body.style.background = '#0d0d14';
+        // Oscurecer foto hero
+        document.querySelector('.hero-photo') && (document.querySelector('.hero-photo').style.opacity = '0.35');
+        // Oscurecer stat pills
+        document.querySelectorAll('.stat-pill').forEach(p => { p.style.background='rgba(10,15,30,0.85)'; p.style.color='#f0ece4'; });
+        document.querySelectorAll('.stat-pill-num').forEach(p => p.style.color='#f0ece4');
+        document.querySelectorAll('.stat-pill-label').forEach(p => p.style.color='rgba(255,255,255,0.5)');
+    } else {
+        document.documentElement.style.setProperty('--sand','#FFF3E0');
+        document.documentElement.style.setProperty('--sand-dark','#FFE0B2');
+        document.documentElement.style.setProperty('--white','#FFFFFF');
+        document.documentElement.style.setProperty('--text','#16213E');
+        document.documentElement.style.setProperty('--text-mid','#2C3E6B');
+        document.documentElement.style.setProperty('--text-muted','#8899BB');
+        document.documentElement.style.setProperty('--dark','#1A1A2E');
+        document.documentElement.style.setProperty('--ocean-deep','#023E8A');
+        document.documentElement.style.setProperty('--ocean','#0096C7');
+        document.documentElement.style.setProperty('--ocean-light','#48CAE4');
+        document.body.style.background = '';
+        document.querySelector('.hero-photo') && (document.querySelector('.hero-photo').style.opacity = '1');
+        document.querySelectorAll('.stat-pill').forEach(p => { p.style.background='rgba(255,255,255,0.95)'; p.style.color=''; });
+        document.querySelectorAll('.stat-pill-num').forEach(p => p.style.color='');
+        document.querySelectorAll('.stat-pill-label').forEach(p => p.style.color='');
+    }
+
+    if (mapB && mapTileB) {
+        mapB.removeLayer(mapTileB);
+        mapTileB = L.tileLayer(
+            isDarkB
+                ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+                : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+            {attribution:'&copy; CartoDB'}).addTo(mapB);
+        document.getElementById('map-b-canvas').style.filter = isDarkB
+            ? 'invert(1) hue-rotate(180deg) saturate(0.35) brightness(0.9)'
+            : 'saturate(1.15) brightness(1.02)';
+    }
+});
+
+// ── INIT — al final de todo para que todas las variables estén declaradas ──
+setLangB('ca');
+</script>
+</body>
+</html>
